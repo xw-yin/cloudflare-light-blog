@@ -3,8 +3,29 @@ main = "src/worker.js"
 compatibility_date = "2024-05-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ============================================
+# D1 数据库绑定（必须）
+# 创建 D1 数据库后，在 Cloudflare Dashboard 获取 database_id
+# ============================================
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-db"
+database_id = "f5720522-fa10-4916-84ff-7e947b12edfb"
+# database_id 需要从 Cloudflare Dashboard 获取并填入
+# 或者通过环境变量传入: database_id = ${D1_DATABASE_ID}
+
+# ============================================
+# R2 存储绑定（可选）
+# 创建 R2 存储桶后，在 Cloudflare Dashboard 获取 bucket 名称
+# ============================================
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "blog-images"
+
+# 环境变量（部署时在 Worker Settings → Variables 中设置）
+# ADMIN_PASSWORD = "your-admin-password"
+
 # GitHub 绑定部署配置
-# 在 Cloudflare Dashboard 创建 Worker 后，连接 GitHub 仓库
 # Build settings:
 #   - Build command: (留空)
 #   - Build output directory: (留空)

@@ -201,63 +201,73 @@ async function handleAPI(request, env, path) {
   }
 
   if (path === '/api/admin/post' && method === 'POST') {
-    const body = await request.json();
+    try {
+      const body = await request.json();
 
-    // 生成 slug
-    const slug = body.slug || generateSlug(body.title);
+      // 生成 slug
+      const slug = body.slug || generateSlug(body.title);
 
-    // 处理封面图片
-    let coverImage = body.cover_image;
-    if (body.cover_image && body.cover_image.startsWith('data:')) {
-      coverImage = await uploadImage(env, body.cover_image, slug);
+      // 处理封面图片
+      let coverImage = body.cover_image;
+      if (body.cover_image && body.cover_image.startsWith('data:')) {
+        coverImage = await uploadImage(env, body.cover_image, slug);
+      }
+
+      const result = await env.DB.prepare(`
+        INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        body.title,
+        slug,
+        body.content,
+        body.excerpt || (body.content ? body.content.substring(0, 200) + '...' : ''),
+        coverImage || '',
+        body.category || '未分类',
+        body.tags || '',
+        body.status || 'draft'
+      ).run();
+
+      return json({ success: true, id: result.lastInsertRowid });
+    } catch (e) {
+      console.error('创建文章失败:', e);
+      return json({ success: false, error: e.message }, 500);
     }
-
-    const result = await env.DB.prepare(`
-      INSERT INTO posts (title, slug, content, excerpt, cover_image, category, tags, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      body.title,
-      slug,
-      body.content,
-      body.excerpt || body.content.substring(0, 200) + '...',
-      coverImage || '',
-      body.category || '未分类',
-      body.tags || '',
-      body.status || 'draft'
-    ).run();
-
-    return json({ success: true, id: result.meta.last_row_id });
   }
 
   if (path === '/api/admin/post' && method === 'PUT') {
     const id = new URL(request.url).searchParams.get('id');
     if (!id) return json({ error: '缺少 id' }, 400);
 
-    const body = await request.json();
+    try {
+      const body = await request.json();
 
-    // 处理封面图片
-    let coverImage = body.cover_image;
-    if (body.cover_image && body.cover_image.startsWith('data:')) {
-      coverImage = await uploadImage(env, body.cover_image, id);
+      // 处理封面图片
+      let coverImage = body.cover_image;
+      if (body.cover_image && body.cover_image.startsWith('data:')) {
+        coverImage = await uploadImage(env, body.cover_image, id);
+      }
+
+      await env.DB.prepare(`
+        UPDATE posts SET
+          title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?,
+          updated_at=datetime('now')
+        WHERE id=?
+      `).bind(
+        body.title,
+        body.content,
+        body.excerpt || (body.content ? body.content.substring(0, 200) : ''),
+        coverImage || body.cover_image || '',
+        body.category || '未分类',
+        body.tags || '',
+        body.status || 'draft',
+        id
+      ).run();
+
+      return json({ success: true });
+    } catch (e) {
+      console.error('更新文章失败:', e);
+      return json({ success: false, error: e.message }, 500);
     }
-
-    await env.DB.prepare(`
-      UPDATE posts SET
-        title=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, status=?,
-        updated_at=datetime('now')
-      WHERE id=?
-    `).bind(
-      body.title,
-      body.content,
-      body.excerpt || body.content.substring(0, 200),
-      coverImage || body.cover_image,
-      body.category || '未分类',
-      body.tags || '',
-      body.status || 'draft',
-      id
-    ).run();
-
-    return json({ success: true });
   }
 
   if (path === '/api/admin/post' && method === 'DELETE') {
@@ -440,10 +450,13 @@ function getFrontendHTML() {
     async function loadPosts() {
       try {
         const res = await fetch('/api/posts');
+        if (!res.ok) {
+          throw new Error('HTTP ' + res.status);
+        }
         const posts = await res.json();
         const app = document.getElementById('app');
         
-        if (posts.length === 0) {
+        if (!posts || posts.length === 0) {
           app.innerHTML = '<p style="text-align:center;color:#999;">暂无文章</p>';
           return;
         }
@@ -463,7 +476,8 @@ function getFrontendHTML() {
           </article>
         \`).join('');
       } catch (e) {
-        document.getElementById('app').innerHTML = '<p style="text-align:center;color:#f00;">加载失败</p>';
+        console.error('加载失败:', e);
+        document.getElementById('app').innerHTML = '<p style="text-align:center;color:#f00;">加载失败: ' + e.message + '</p>';
       }
     }
     loadPosts();
@@ -692,15 +706,26 @@ function getAdminHTML() {
         const savePost = async () => {
           try {
             if (editingId.value) {
-              await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value });
+              const res = await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value });
+              if (res.data.success) {
+                showModal.value = false;
+                loadPosts();
+                showToast('保存成功');
+              } else {
+                alert('保存失败: ' + (res.data.error || '未知错误'));
+              }
             } else {
-              await api('/api/admin/post', { method: 'POST', data: form.value });
+              const res = await api('/api/admin/post', { method: 'POST', data: form.value });
+              if (res.data.success) {
+                showModal.value = false;
+                loadPosts();
+                showToast('保存成功');
+              } else {
+                alert('保存失败: ' + (res.data.error || '未知错误'));
+              }
             }
-            showModal.value = false;
-            loadPosts();
-            showToast('保存成功');
           } catch (e) {
-            alert('保存失败');
+            alert('保存失败: ' + (e.response?.data?.error || e.message));
           }
         };
 

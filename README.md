@@ -35,6 +35,7 @@ npm install
 2. 进入 **Workers & Pages** → **D1**
 3. 点击 **Create database**
 4. 输入名称 `blog-db`，点击 Create
+5. 点击数据库进入详情页，复制 **Database ID**
 
 ### 3. 创建 R2 存储桶（可选）
 
@@ -42,82 +43,65 @@ npm install
 2. 点击 **Create bucket**
 3. 输入名称 `blog-images`，点击 Create
 
-### 4. 部署到 Cloudflare
+### 4. 修改 wrangler.toml
+
+编辑 `wrangler.toml`，填入你的 D1 Database ID：
+
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "blog-db"
+database_id = "你的-D1-Database-ID"  # 替换为你的 ID
+
+# 如果使用 R2，取消注释：
+# [[r2_buckets]]
+# binding = "R2"
+# bucket_name = "blog-images"
+```
+
+### 5. 设置环境变量
+
+在 Worker 的 **Settings → Variables** 中添加：
+
+| 变量名 | 说明 |
+|--------|------|
+| ADMIN_PASSWORD | 管理员密码 |
+
+### 6. 部署
 
 ```bash
-npm run deploy
+# 本地测试
+npm run dev
+
+# 推送到 GitHub（会自动部署）
+git add .
+git commit -m "Init"
+git push origin main
 ```
 
-### 5. 绑定 D1 和 R2
+## GitHub 部署说明
 
-部署完成后，在 Worker 设置中绑定：
+### 绑定 GitHub 仓库
 
-**D1 数据库绑定：**
-1. 进入 Worker → **Settings** → **Variables**
-2. 找到 **D1 Database Bindings**
-3. 点击 **Add binding**
-4. 填写：
-   - **Variable name**: `DB`
-   - **D1 database**: 选择 `blog-db`
-5. 点击 Save
+1. Cloudflare Dashboard → Workers & Pages → Create Application
+2. 选择 **Workers** → **Connect to Git**
+3. 选择你的仓库
 
-**R2 存储绑定（可选）：**
-1. 进入 Worker → **Settings** → **Variables**
-2. 找到 **R2 Bucket Bindings**
-3. 点击 **Add binding**
-4. 填写：
-   - **Variable name**: `R2`
-   - **Bucket name**: 选择 `blog-images`
-5. 点击 Save
+### 配置部署
 
-**设置管理员密码：**
-1. 在 **Environment Variables** 中添加：
-   - **Variable name**: `ADMIN_PASSWORD`
-   - **Value**: 你的密码
-   - 勾选 **Encrypt** 加密
-2. 点击 Save
+在 GitHub 仓库的 Settings 中配置：
 
-### 6. 重新部署
+1. **Build settings**:
+   - Build command: （留空）
+   - Build output directory: （留空）
+   - Deploy command: `npx wrangler deploy`
 
-修改环境变量后需要重新部署：
+2. **环境变量**（可选，用于 CI/CD）:
+   - `D1_DATABASE_ID`: 你的 D1 数据库 ID
 
-```bash
-npm run deploy
-```
+### 为什么 wrangler.toml 需要配置绑定？
 
-## 目录结构
-
-```
-cloudflare-light-blog/
-├── src/
-│   └── worker.js      # 主程序（包含前端和后端）
-├── wrangler.toml      # Cloudflare 配置
-├── package.json       # 项目配置
-├── .dev.vars.example  # 本地开发环境变量示例
-├── .gitignore         # Git 忽略规则
-└── README.md          # 说明文档
-```
-
-## API 接口
-
-### 公开接口
-
-| 接口 | 方法 | 说明 |
-|------|------|------|
-| /api/posts | GET | 获取已发布文章列表 |
-| /api/post?slug=xxx | GET | 获取文章详情 |
-| /api/categories | GET | 获取分类列表 |
-| /api/settings | GET | 获取网站设置 |
-
-### 管理接口（需要认证）
-
-| 接口 | 方法 | 说明 |
-|------|------|------|
-| /api/admin/posts | GET | 获取所有文章 |
-| /api/admin/post | POST | 创建文章 |
-| /api/admin/post?id=xxx | PUT | 更新文章 |
-| /api/admin/post?id=xxx | DELETE | 删除文章 |
-| /api/upload | POST | 上传图片 |
+每次从 GitHub 部署时，Cloudflare 会使用 `wrangler.toml` 中的配置来更新 Worker。必须在配置文件中声明 D1 和 R2 绑定，部署后绑定才不会丢失。
 
 ## 访问
 
