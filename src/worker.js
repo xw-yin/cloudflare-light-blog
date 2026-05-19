@@ -579,11 +579,17 @@ function getFrontendHTML() {
           return;
         }
         
+        // 日期格式化函数
+        const formatDate = (dateStr) => {
+          const d = new Date(dateStr);
+          return d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0');
+        };
+        
         app.innerHTML = posts.map(post => \`
           <article class="post-card">
             \${post.cover_image ? \`<img src="\${post.cover_image}" alt="\${post.title}">\` : ''}
             <div class="content">
-              <h2><a href="/post/\${new Date(post.created_at).getFullYear()}\${String(post.created_at.getMonth()+1).padStart(2,'0')}/\${post.id}">\${post.title}</a></h2>
+              <h2><a href="/post/\${formatDate(post.created_at)}/\${post.id}">\${post.title}</a></h2>
               <p class="excerpt">\${post.excerpt || ''}</p>
               <div class="meta">
                 <span>\${post.category}</span>
@@ -769,7 +775,7 @@ function getAdminHTML() {
         const posts = ref([]);
         const showModal = ref(false);
         const editingId = ref(null);
-        const form = ref({ title: '', category: '', status: 'draft', tags: '', excerpt: '', content: '', cover_image: '' });
+        const form = reactive({ title: '', category: '', status: 'draft', tags: '', excerpt: '', content: '', cover_image: '' });
         const coverPreview = ref('');
         const toast = ref('');
 
@@ -804,14 +810,14 @@ function getAdminHTML() {
 
         const openAdd = () => {
           editingId.value = null;
-          form.value = { title: '', category: '', status: 'draft', tags: '', excerpt: '', content: '', cover_image: '' };
+          form = { title: '', category: '', status: 'draft', tags: '', excerpt: '', content: '', cover_image: '' };
           coverPreview.value = '';
           showModal.value = true;
         };
 
         const openEdit = (post) => {
           editingId.value = post.id;
-          form.value = { 
+          form = { 
             title: post.title || '',
             content: post.content || '',
             excerpt: post.excerpt || '',
@@ -857,13 +863,13 @@ function getAdminHTML() {
             uploadProgress.value = 100;
             
             if (data.url) {
-              form.value.cover_image = data.url;
+              form.cover_image = data.url;
               coverPreview.value = data.url;
             } else {
               // 如果上传失败，使用 base64
               const reader = new FileReader();
               reader.onload = (e) => {
-                form.value.cover_image = e.target.result;
+                form.cover_image = e.target.result;
                 coverPreview.value = e.target.result;
               };
               reader.readAsDataURL(file);
@@ -873,7 +879,7 @@ function getAdminHTML() {
             // 降级为 base64
             const reader = new FileReader();
             reader.onload = (e) => {
-              form.value.cover_image = e.target.result;
+              form.cover_image = e.target.result;
               coverPreview.value = e.target.result;
             };
             reader.readAsDataURL(file);
@@ -888,7 +894,7 @@ function getAdminHTML() {
         const savePost = async () => {
           try {
             if (editingId.value) {
-              const res = await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value });
+              const res = await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form });
               if (res.data.success) {
                 showModal.value = false;
                 loadPosts();
@@ -897,7 +903,7 @@ function getAdminHTML() {
                 alert('保存失败: ' + (res.data.error || '未知错误'));
               }
             } else {
-              const res = await api('/api/admin/post', { method: 'POST', data: form.value });
+              const res = await api('/api/admin/post', { method: 'POST', data: form });
               if (res.data.success) {
                 showModal.value = false;
                 loadPosts();
