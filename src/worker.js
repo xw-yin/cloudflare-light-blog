@@ -190,6 +190,9 @@ async function handleAPI(request, env, path) {
     return json({ success: false, error: '密码错误' }, 401);
   }
 
+  // 确保数据库已初始化
+  await initDB(env);
+
   // 公开 API（不需要认证）
   const publicAPIs = ['/api/posts', '/api/post/', '/api/categories', '/api/settings', '/api/stats', '/api/links'];
   const isPublicAPI = publicAPIs.some(api => path.startsWith(api));
@@ -240,7 +243,6 @@ async function handleAPI(request, env, path) {
 
   if (path === '/api/categories' && method === 'GET') {
     try {
-      await initDB(env);
       const { results } = await env.DB.prepare(
         "SELECT * FROM categories ORDER BY name"
       ).all();
@@ -828,23 +830,29 @@ function getFrontendHTML(settings) {
     }).catch(e=>console.error('加载统计失败',e));
     
     // 加载分类导航
-    fetch('/api/categories').then(r=>{console.log('categories:',r.status,r.json());return r.json()}).then(cats=>{
-      console.log('categories data:', cats);
-      const list = document.getElementById('category-list');
-      if(cats && cats.length > 0) {
-        list.innerHTML = '<a href="/">全部</a>' + 
-          cats.map(c=>'<a href="/?category='+encodeURIComponent(c.name)+'">'+c.name+'</a>').join('');
-      }
-    }).catch(e=>console.error('加载分类失败',e));
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(cats => {
+        const list = document.getElementById('category-list');
+        if (cats && Array.isArray(cats) && cats.length > 0) {
+          list.innerHTML = '<a href="/">全部</a>' + 
+            cats.map(c => '<a href="/?category=' + encodeURIComponent(c.name) + '">' + c.name + '</a>').join('');
+        } else {
+          list.innerHTML = '<span style="color:#999;font-size:13px">暂无分类</span>';
+        }
+      });
     
     // 加载友链
-    fetch('/api/links').then(r=>{console.log('links:',r.status);return r.json()}).then(links=>{
-      console.log('links data:', links);
-      const list = document.getElementById('link-list');
-      if(links && links.length > 0) {
-        list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
-      }
-    }).catch(e=>console.error('加载友链失败',e));
+    fetch('/api/links')
+      .then(r => r.json())
+      .then(links => {
+        const list = document.getElementById('link-list');
+        if (links && Array.isArray(links) && links.length > 0) {
+          list.innerHTML = links.map(l => '<a href="' + l.url + '" target="_blank">' + l.name + '</a>').join('');
+        } else {
+          list.innerHTML = '<span style="color:#999;font-size:13px">暂无友链</span>';
+        }
+      });
     
     async function loadPosts() {
       try {
