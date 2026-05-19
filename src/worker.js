@@ -38,22 +38,43 @@ async function initDB(env) {
   }
 
   try {
-    // 检查表是否存在
+    // 检查 posts 表是否存在
     const { results } = await env.DB.prepare(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='posts'"
     ).all();
 
     // 检查并添加 password 列（如果不存在）
-    try {
-      await env.DB.prepare("SELECT password FROM posts LIMIT 1").all();
-    } catch (e) {
+    if (results.length > 0) {
       try {
+        await env.DB.prepare("SELECT password FROM posts LIMIT 1").all();
+      } catch (e) {
         await env.DB.prepare("ALTER TABLE posts ADD COLUMN password TEXT").run();
         console.log('已添加 password 列');
-      } catch (e2) {}
+      }
     }
 
-    if (results.length === 0) {
+    // 检查 categories 表是否存在
+    const catResults = await env.DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='categories'"
+    ).all();
+
+    if (catResults.results ? catResults.results.length === 0 : catResults.length === 0) {
+      console.log('创建分类表...');
+      await env.DB.prepare(`
+        CREATE TABLE categories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT UNIQUE NOT NULL,
+          slug TEXT UNIQUE NOT NULL
+        )
+      `).run();
+    }
+
+    // 检查 settings 表是否存在
+    const setResults = await env.DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='settings'"
+    ).all();
+
+    if (setResults.results ? setResults.results.length === 0 : setResults.length === 0) {
       console.log('开始创建数据库表...');
       
       // 使用 prepare 执行 CREATE TABLE
@@ -72,23 +93,6 @@ async function initDB(env) {
           view_count INTEGER DEFAULT 0,
           created_at TEXT,
           updated_at TEXT
-        )
-      `).run();
-
-      await env.DB.prepare(`
-        CREATE TABLE categories (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT UNIQUE NOT NULL,
-          slug TEXT UNIQUE NOT NULL,
-          description TEXT
-        )
-      `).run();
-
-      await env.DB.prepare(`
-        CREATE TABLE settings (
-          id INTEGER PRIMARY KEY,
-          key TEXT UNIQUE NOT NULL,
-          value TEXT
         )
       `).run();
 
