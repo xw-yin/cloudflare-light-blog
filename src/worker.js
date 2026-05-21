@@ -693,6 +693,22 @@ function getFrontendHTML(settings) {
     .profile-card .category-list a, .profile-card .link-list a { display: block; padding: 8px 12px; margin: 0 0 6px 0; color: #725d42; text-decoration: none; background: #f0e8d8; border-radius: 12px; font-size: 0.85em; font-weight: 600; transition: all 0.2s; border: 2px solid transparent; }
     .profile-card .category-list a:hover, .profile-card .link-list a:hover { background: #e6f9f6; border-color: #19c8b9; color: #11a89b; }
     footer { text-align: center; padding: 30px 20px; color: #9f927d; font-size: 0.85em; font-weight: 500; }
+    
+    @media (max-width: 768px) {
+      header { padding: 30px 16px; }
+      header h1 { font-size: 1.8em; }
+      header p { font-size: 0.95em; }
+      main { flex-direction: column; padding: 0 16px; gap: 20px; }
+      .sidebar { width: 100%; }
+      .profile-card { padding: 20px; }
+      .profile-card .avatar { width: 60px; height: 60px; }
+      .profile-card .name { font-size: 1em; }
+      .post-card { flex-direction: column; }
+      .post-card .post-cover { width: 100%; height: 180px; }
+      .post-card .post-content { padding: 16px; }
+      .post-card h2 { font-size: 1.1em; }
+      .post-card a.read-more { width: 100%; text-align: center; }
+    }
   </style>
 </head>
 <body>
@@ -899,6 +915,22 @@ function getPostHTML(post, settings) {
     .back-link:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #11a89b; }
     .back-link:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
     footer { text-align: center; padding: 30px 20px; color: #9f927d; font-size: 0.85em; font-weight: 500; }
+    
+    @media (max-width: 768px) {
+      header { padding: 30px 16px; }
+      header h1 { font-size: 1.8em; }
+      header p { font-size: 0.95em; }
+      main { flex-direction: column; padding: 0 16px; gap: 20px; }
+      .sidebar { width: 100%; }
+      .profile-card { padding: 20px; }
+      .profile-card .avatar { width: 60px; height: 60px; }
+      .profile-card .name { font-size: 1em; }
+      .post-card { flex-direction: column; }
+      .post-card .post-cover { width: 100%; height: 180px; }
+      .post-card .post-content { padding: 16px; }
+      .post-card h2 { font-size: 1.1em; }
+      .post-card a.read-more { width: 100%; text-align: center; }
+    }
   </style>
 </head>
 <body>
@@ -1052,6 +1084,23 @@ function getAdminHTML() {
     .modal-footer { padding: 16px 20px; border-top: 2px solid #e8e0cc; display: flex; justify-content: flex-end; gap: 12px; }
     
     .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #6fba2c; color: #fff; border-radius: 50px; z-index: 2000; font-weight: 600; box-shadow: 0 4px 0 0 #5a9e1e; }
+    
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+      .sidebar-header { display: none; }
+      .sidebar-menu { display: flex; padding: 8px; gap: 4px; }
+      .sidebar-menu a { white-space: nowrap; padding: 8px 14px; margin: 0; }
+      .sidebar-footer { display: none; }
+      .main-content { padding: 16px; }
+      .page-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .page-header h2 { font-size: 1.3em; }
+      table { font-size: 0.85em; }
+      th, td { padding: 10px 8px; }
+      .form-row { grid-template-columns: 1fr; }
+      .card { padding: 16px; }
+      .btn { width: 100%; text-align: center; }
+    }
   </style>
 </head>
 <body>
