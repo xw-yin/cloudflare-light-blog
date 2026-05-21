@@ -212,9 +212,16 @@ async function handleAPI(request, env, path) {
   // 公开 API
   if (path === '/api/posts' && method === 'GET') {
     try {
-      const { results } = await env.DB.prepare(
-        "SELECT id, title, slug, content, excerpt, cover_image, category, tags, view_count, created_at FROM posts WHERE status='published' ORDER BY created_at DESC"
-      ).all();
+      const url = new URL(request.url);
+      const category = url.searchParams.get('category');
+      let sql = "SELECT id, title, slug, content, excerpt, cover_image, category, tags, view_count, created_at FROM posts WHERE status='published'";
+      let params = [];
+      if (category) {
+        sql += " AND category=?";
+        params.push(category);
+      }
+      sql += " ORDER BY created_at DESC";
+      const { results } = await env.DB.prepare(sql).bind(...params).all();
       return json(results);
     } catch (e) {
       return json({ error: e.message }, 500);
@@ -709,9 +716,9 @@ function getFrontendHTML(settings) {
             <div class="stat-label">分类</div>
           </div>
         </div>
-        <h4>分类</h4>
+        <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>友链</h4>
+        <h4>🔗 友链</h4>
         <div id="link-list" class="link-list"></div>
       </div>
     </aside>
@@ -728,18 +735,18 @@ function getFrontendHTML(settings) {
     fetch('/api/categories').then(r=>r.json()).then(cats=>{
       const list = document.getElementById('category-list');
       if(cats && Array.isArray(cats) && cats.length > 0) {
-        list.innerHTML = cats.map(c=>'<a href="/?category='+encodeURIComponent(c.name)+'">'+c.name+'</a>').join('');
+        list.innerHTML = cats.map(c=>'<a href="/?category='+encodeURIComponent(c.name)+'">📂 '+c.name+'</a>').join('');
       }
     });
     fetch('/api/links').then(r=>r.json()).then(links=>{
       const list = document.getElementById('link-list');
       if(links && Array.isArray(links) && links.length > 0) {
-        list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
+        list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">🔗 '+l.name+'</a>').join('');
       }
     });
     async function loadPosts() {
       try {
-        const res = await fetch('/api/posts');
+        const res = await fetch('/api/posts' + (window.location.search || ''));
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const posts = await res.json();
         const app = document.getElementById('app');
@@ -915,9 +922,9 @@ function getPostHTML(post, settings) {
             <div class="stat-label">分类</div>
           </div>
         </div>
-        <h4>分类</h4>
+        <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
-        <h4>友链</h4>
+        <h4>🔗 友链</h4>
         <div id="link-list" class="link-list"></div>
       </div>
     </aside>
@@ -943,13 +950,13 @@ function getPostHTML(post, settings) {
     fetch('/api/categories').then(r=>r.json()).then(cats=>{
       const list = document.getElementById('category-list');
       if(cats && Array.isArray(cats) && cats.length > 0) {
-        list.innerHTML = cats.map(c=>'<a href="/?category='+encodeURIComponent(c.name)+'">'+c.name+'</a>').join('');
+        list.innerHTML = cats.map(c=>'<a href="/?category='+encodeURIComponent(c.name)+'">📂 '+c.name+'</a>').join('');
       }
     });
     fetch('/api/links').then(r=>r.json()).then(links=>{
       const list = document.getElementById('link-list');
       if(links && Array.isArray(links) && links.length > 0) {
-        list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
+        list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">🔗 '+l.name+'</a>').join('');
       }
     });
   </script>
