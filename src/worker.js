@@ -1001,6 +1001,13 @@ function getPostHTML(post, settings) {
       }
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var content = ${JSON.stringify(post.content)};
+      document.getElementById('post-content').innerHTML = marked.parse(content);
+    });
+  </script>
 </body>
 </html>`;
 }
