@@ -758,28 +758,32 @@ function getFrontendHTML(settings) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${siteName}</title>
   ${favicon ? `<link rel="icon" href="${favicon}">` : ''}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
-    header { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 40px 20px; text-align: center; }
-    header h1 { font-size: 2.5em; margin-bottom: 10px; }
-    header p { opacity: 0.9; font-size: 1.1em; }
-    main { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: flex; gap: 30px; align-items: flex-start; }
+    body { font-family: Nunito, 'Noto Sans SC', sans-serif; background: #f8f8f0; color: #725d42; }
+    header { background: linear-gradient(135deg, #7DC395 0%, #5BAF7A 100%); color: #fff; padding: 40px 20px; text-align: center; position: relative; overflow: hidden; }
+    header::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, rgba(0,0,0,0.05)); }
+    header h1 { font-size: 2.5em; font-weight: 800; margin-bottom: 8px; letter-spacing: 0.02em; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    header a { color: #fff; text-decoration: none; }
+    header p { opacity: 0.9; font-size: 1.1em; font-weight: 500; }
+    main { max-width: 1100px; margin: 30px auto; padding: 0 20px; display: flex; gap: 24px; align-items: flex-start; }
     .sidebar { width: 280px; flex-shrink: 0; }
     .post-list { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-    .post-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; flex-direction: row !important; }
-    .post-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
-    
-    .post-card h2 { font-size: 1.2em; margin-bottom: 8px; color: #1a1a1a; }
-    .post-card .excerpt { color: #666; line-height: 1.5; font-size: 0.9em; }
-    .post-card .meta { display: flex; gap: 12px; color: #999; font-size: 0.85em; margin-top: 12px; }
-    .post-card a.read-more { display: inline-block; padding: 6px 16px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 0.85em; align-self: flex-start; margin-top: 12px; }
-    .post-card a.read-more:hover { background: #5568d3; }
-    .post-card .post-cover { width: 220px; flex-shrink: 0; background: #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .post-card { background: #f7f3df; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); display: flex; flex-direction: row; transition: all 0.3s ease; border: 2px solid #e8e0cc; }
+    .post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(114, 93, 66, 0.15); }
+    .post-card .post-cover { width: 220px; flex-shrink: 0; background: #e8e0cc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .post-card .post-cover img { width: 100%; height: 100%; object-fit: cover; }
     .post-card .post-content { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
-    
-    /* 博客简介卡片 */
+    .post-card h2 { font-size: 1.2em; margin-bottom: 8px; color: #794f27; font-weight: 700; }
+    .post-card h2 a { color: #794f27; text-decoration: none; }
+    .post-card .excerpt { color: #725d42; line-height: 1.5; font-size: 0.9em; font-weight: 500; }
+    .post-card .meta { display: flex; gap: 12px; color: #9f927d; font-size: 0.8em; margin-top: 12px; font-weight: 600; }
+    .post-card a.read-more { display: inline-block; padding: 8px 20px; background: #19c8b9; color: #fff; text-decoration: none; border-radius: 50px; font-size: 0.85em; font-weight: 600; align-self: flex-start; margin-top: 12px; box-shadow: 0 4px 0 0 #11a89b; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .post-card a.read-more:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #11a89b; }
+    .post-card a.read-more:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
     .profile-card { background: #f7f3df; border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); border: 2px solid #e8e0cc; }
     .profile-card .avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; display: block; border: 3px solid #c4b89e; background: #e8e0cc; }
     .profile-card .name { font-size: 1.1em; font-weight: 700; text-align: center; margin-bottom: 4px; color: #794f27; }
@@ -791,26 +795,7 @@ function getFrontendHTML(settings) {
     .profile-card h4 { font-size: 0.85em; color: #9f927d; margin: 14px 0 8px; font-weight: 700; letter-spacing: 0.5px; }
     .profile-card .category-list a, .profile-card .link-list a { display: block; padding: 8px 12px; margin: 0 0 6px 0; color: #725d42; text-decoration: none; background: #f0e8d8; border-radius: 12px; font-size: 0.85em; font-weight: 600; transition: all 0.2s; border: 2px solid transparent; }
     .profile-card .category-list a:hover, .profile-card .link-list a:hover { background: #e6f9f6; border-color: #19c8b9; color: #11a89b; }
-    .profile-card .bio { color: #666; font-size: 0.9em; margin-bottom: 16px; }
-    .profile-card .stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
-    .profile-card .stat-item { text-align: center; }
-    .profile-card .stat-num { font-size: 1.2em; font-weight: bold; color: #667eea; }
-    .profile-card .stat-label { font-size: 0.8em; color: #999; }
-    .profile-card h4 { font-size: 0.9em; color: #999; margin: 16px 0 12px; text-align: left; }
-    .profile-card .category-list, .profile-card .link-list { text-align: left; }
-    .profile-card .category-list a, .profile-card .link-list a { display: block; padding: 8px 0; color: #333; text-decoration: none; border-bottom: 1px solid #f5f5f5; }
-    .profile-card .category-list a:hover, .profile-card .link-list a:hover { color: #667eea; }
-    .profile-card .link-list a { display: flex; justify-content: space-between; }
-    .post-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; }
-    .post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
-    .post-card img { width: 100%; height: 240px; object-fit: cover; }
-    .post-card .content { padding: 24px; }
-    .post-card h2 { font-size: 1.4em; margin-bottom: 12px; color: #1a1a1a; }
-    .post-card .excerpt { color: #666; line-height: 1.6; margin-bottom: 16px; }
-    .post-card .meta { display: flex; gap: 16px; color: #999; font-size: 0.9em; }
-    .post-card a { display: inline-block; color: #667eea; text-decoration: none; font-weight: 500; }
-    .post-card a:hover { text-decoration: underline; }
-    footer { text-align: center; padding: 40px 20px; color: #999; }
+    footer { text-align: center; padding: 30px 20px; color: #9f927d; font-size: 0.85em; font-weight: 500; }
   </style>
 </head>
 <body>
