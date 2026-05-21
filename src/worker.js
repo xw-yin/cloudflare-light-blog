@@ -781,7 +781,7 @@ function getFrontendHTML(settings) {
           const cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '">' : '<span style="color:#9f927d">暂无封面</span>';
           const tagColors = ['#19c8b9','#f5c31c','#e05a5a','#889df0','#8ac68a','#e59266','#b77dee','#f8a6b2'];
           const tags = post.tags ? post.tags.split(',').map((t,i) => '<span style="display:inline-block;padding:2px 10px;background:' + tagColors[i % tagColors.length] + ';border-radius:50px;font-size:0.75em;color:#fff;font-weight:600;margin-left:6px">' + t.trim() + '</span>').join('') : '';
-          const excerpt = post.content ? post.content.substring(0, 25) + (post.content.length > 25 ? '...' : '') : '';
+          const excerpt = post.password ? '🔒 该文章受到密码保护' : (post.content ? post.content.substring(0, 30) + (post.content.length > 30 ? '...' : '') : '');
           return '<article class="post-card">' +
             '<div class="post-cover">' + cover + '</div>' +
             '<div class="post-content">' +
