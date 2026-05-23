@@ -872,18 +872,18 @@ function getFrontendHTML(settings) {
         app.innerHTML = html + posts.map(post => {
           const cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '">' : '<span style="color:#9f927d">暂无封面</span>';
           const tagColors = ['#19c8b9','#f5c31c','#e05a5a','#889df0','#8ac68a','#e59266','#b77dee','#f8a6b2'];
-          const tags = post.tags ? post.tags.split(',').map((t,i) => '<span style="display:inline-block;padding:2px 10px;background:' + tagColors[i % tagColors.length] + ';border-radius:50px;font-size:0.75em;color:#fff;font-weight:600;margin-left:6px">' + t.trim() + '</span>').join('') : '';
+          const tags = post.tags ? post.tags.split(',').map((t,i) => '<span style="display:inline-block;padding:2px 10px;background:' + tagColors[i % tagColors.length] + ';border-radius:50px;font-size:0.75em;color:#fff;font-weight:600;margin-right:6px">' + t.trim() + '</span>').join('') : '';
           const excerpt = post.password ? '🔒 该文章受到密码保护' : (post.content ? post.content.substring(0, 30) + (post.content.length > 30 ? '...' : '') : '');
           return '<article class="post-card">' +
             '<div class="post-cover">' + cover + '</div>' +
             '<div class="post-content">' +
               '<h2><a href="/post/' + formatDate(post.created_at) + '/' + post.id + '">' + post.title + '</a></h2>' +
               '<p style="color:#725d42;font-size:0.9em;line-height:1.5;margin:8px 0">' + excerpt + '</p>' +
+              (tags ? '<div style="margin:8px 0">' + tags + '</div>' : '') +
               '<div class="meta">' +
                 '<span>' + post.category + '</span>' +
                 '<span>' + post.view_count + ' 阅读</span>' +
                 '<span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span>' +
-                tags +
               '</div>' +
               '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '" target="_blank">阅读更多</a>' +
             '</div>' +
@@ -1234,6 +1234,8 @@ function getAdminHTML() {
       .btn-cancel { padding: 10px 20px; font-size: 14px; }
       .actions .edit, .actions .delete { padding: 5px 10px; font-size: 12px; }
       .category-item { padding: 10px 12px; border-radius: 10px; }
+      .post-card-mobile { display: flex; flex-direction: column; }
+      .post-card-mobile .actions { order: -1; margin-bottom: 8px; }
     }
   </style>
 </head>
@@ -1290,7 +1292,7 @@ function getAdminHTML() {
           </div>
           <div v-for="post in posts" :key="post.id" style="margin-bottom:16px">
             <div class="card" style="margin-bottom:0">
-              <div style="display:flex;align-items:center;gap:12px">
+              <div class="post-card-mobile" style="display:flex;align-items:center;gap:12px">
                 <div class="actions" style="display:flex;gap:6px">
                   <button class="delete" @click="deletePost(post.id)">删除</button>
                   <button class="edit" @click="toggleEdit(post)">{{ editingId === post.id ? '收起' : '编辑' }}</button>
@@ -1505,7 +1507,7 @@ function getAdminHTML() {
           
           <!-- 分类列表 -->
           <div v-for="cat in categories" :key="cat.id" class="card" style="margin-bottom:12px">
-            <div style="display:flex;align-items:center;gap:12px">
+            <div class="post-card-mobile" style="display:flex;align-items:center;gap:12px">
               <div class="actions" style="display:flex;gap:6px">
                 <button class="delete" @click="deleteCategory(cat.id)">删除</button>
                 <button class="edit" @click="editCategory(cat)">编辑</button>
@@ -1787,7 +1789,7 @@ function getAdminHTML() {
         const uploadAvatar = async (file) => { const fd = new FormData(); fd.append('file', file); const res = await fetch('/api/upload', { method: 'POST', body: fd }); const data = await res.json(); if (data.url) settingsForm.value.site_avatar = data.url; };
 
         const trashPosts = ref([]);
-        const sidebarCollapsed = ref(false);
+        const sidebarCollapsed = ref(window.innerWidth <= 768);
         
         const loadTrash = async () => {
           try { const res = await api('/api/admin/trash'); trashPosts.value = res.data; } catch(e) {}
