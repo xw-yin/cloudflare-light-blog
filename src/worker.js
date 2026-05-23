@@ -778,8 +778,8 @@ function getFrontendHTML(settings) {
       .profile-card .avatar { width: 56px; height: 56px; }
       .profile-card .name { font-size: 1em; }
       .post-list { width: 100%; gap: 16px; }
-      .post-card { flex-direction: row; border-radius: 16px; }
-      .post-card .post-cover { width: 120px; min-height: 100px; }
+      .post-card { flex-direction: column; border-radius: 16px; }
+      .post-card .post-cover { display: none; }
       .post-card .post-content { padding: 14px; }
       .post-card h2 { font-size: 1em; }
       .post-card .excerpt { font-size: 0.8em; }
@@ -1275,7 +1275,7 @@ function getAdminHTML() {
           <button @click="logout">🚪 <span>退出登录</span></button>
         </div>
         <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed">
-          {{ sidebarCollapsed ? '▶' : '◀' }} <span v-if="!sidebarCollapsed">收起</span>
+          ☰
         </button>
       </nav>
       
