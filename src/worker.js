@@ -138,6 +138,10 @@ async function initDB(env) {
 
       await env.DB.prepare(
         "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)"
+      ).bind('custom_js', '').run();
+
+      await env.DB.prepare(
+        "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)"
       ).bind('site_author', '').run();
 
       // 插入示例文章
@@ -655,7 +659,7 @@ async function handleFrontend(request, env) {
     await initDB(env);
     
     // 获取网站设置
-    let siteSettings = { site_name: '我的博客', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_author: '' };
+    let siteSettings = { site_name: '我的博客', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_author: '', site_footer: '', custom_js: '' };
     try {
       const { results } = await env.DB.prepare("SELECT * FROM settings").all();
       results.forEach(s => siteSettings[s.key] = s.value);
@@ -691,7 +695,7 @@ async function handleFrontend(request, env) {
   
   // 首页 - 获取设置
   await initDB(env);
-  let siteSettings = { site_name: '我的博客', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_author: '' };
+  let siteSettings = { site_name: '我的博客', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_author: '', site_footer: '', custom_js: '' };
   try {
     const { results } = await env.DB.prepare("SELECT * FROM settings").all();
     if (results) {
@@ -807,7 +811,8 @@ function getFrontendHTML(settings) {
       <p style="text-align:center;color:#9f927d;">加载中...</p>
     </div>
   </main>
-  <footer>${settings.site_footer || '© 2026 ' + siteName}</footer>
+  <footer>${settings.site_footer || '&copy; 2026 ' + siteName}</footer>
+  ${settings.custom_js ? '<script>' + settings.custom_js + '<\/script>' : ''}
   <script>
     fetch('/api/stats').then(r=>r.json()).then(s=>{
       document.getElementById('stat-posts').textContent = s.postCount;
@@ -1047,7 +1052,8 @@ function getPostHTML(post, settings) {
       </article>
     </div>
   </main>
-  <footer>${settings.site_footer || '© 2026 ' + siteName}</footer>
+  <footer>${settings.site_footer || '&copy; 2026 ' + siteName}</footer>
+  ${settings.custom_js ? '<script>' + settings.custom_js + '<\/script>' : ''}
   <script>
     fetch('/api/stats').then(r=>r.json()).then(s=>{
       document.getElementById('stat-posts').textContent = s.postCount;
@@ -1447,8 +1453,8 @@ function getAdminHTML() {
           <div v-for="cat in categories" :key="cat.id" class="card" style="margin-bottom:12px">
             <div style="display:flex;align-items:center;gap:12px">
               <div style="display:flex;gap:6px">
-                <button class="btn btn-danger" @click="deleteCategory(cat.id)" style="padding:6px 14px;font-size:13px">删除</button>
-                <button class="btn" @click="editCategory(cat)" style="padding:6px 14px;font-size:13px">编辑</button>
+                <button class="delete" @click="deleteCategory(cat.id)">删除</button>
+                <button class="edit" @click="editCategory(cat)">编辑</button>
               </div>
               <div style="flex:1">
                 <span style="color:#794f27;font-weight:600">{{ cat.name }}</span>
@@ -1520,8 +1526,12 @@ function getAdminHTML() {
               </div>
             </div>
             <div class="form-group">
-              <label>网站页脚</label>
-              <input v-model="settingsForm.site_footer" placeholder="© 2026 我的博客">
+              <label>网站页脚（支持HTML）</label>
+              <textarea v-model="settingsForm.site_footer" placeholder="© 2026 我的博客" rows="4" style="border-radius:18px"></textarea>
+            </div>
+            <div class="form-group">
+              <label>自定义JS（会在页面底部加载）</label>
+              <textarea v-model="settingsForm.custom_js" placeholder="// 自定义JavaScript代码" rows="6" style="border-radius:18px;font-family:monospace"></textarea>
             </div>
             <button class="btn" @click="saveSettings" style="width:100%;margin-top:20px">保存设置</button>
           </div>
@@ -1560,7 +1570,7 @@ function getAdminHTML() {
         const uploadProgress = ref(0);
         const categories = ref([]);
         const currentPage = ref('posts');
-        const settingsForm = ref({ site_name: '', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_links: '', site_author: '', site_footer: '' });
+        const settingsForm = ref({ site_name: '', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_links: '', site_author: '', site_footer: '', custom_js: '' });
         const categoryForm = ref({ name: '', slug: '', description: '' });
         const showCategoryForm = ref(false);
         const editingCategory = ref(null);
@@ -1608,7 +1618,8 @@ function getAdminHTML() {
               site_bio: res.data.site_bio || '',
               site_links: res.data.site_links || '',
               site_author: res.data.site_author || '',
-              site_footer: res.data.site_footer || ''
+              site_footer: res.data.site_footer || '',
+              custom_js: res.data.custom_js || ''
             };
           } catch(e) {}
         };
