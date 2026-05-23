@@ -747,7 +747,7 @@ function getFrontendHTML(settings) {
     .post-card h2 { font-size: 1.2em; margin-bottom: 8px; color: #794f27; font-weight: 700; }
     .post-card h2 a { color: #794f27; text-decoration: none; }
     .post-card .meta { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; color: #9f927d; font-size: 0.8em; margin-top: 12px; font-weight: 600; }
-    .post-card a.read-more { display: inline-block; padding: 8px 20px; background: #19c8b9; color: #fff; text-decoration: none; border-radius: 50px; font-size: 0.85em; font-weight: 600; align-self: flex-start; margin-top: 12px; box-shadow: 0 4px 0 0 #11a89b; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .post-card a.read-more { display: inline-block; padding: 6px 16px; background: #19c8b9; color: #fff; text-decoration: none; border-radius: 50px; font-size: 0.8em; font-weight: 600; box-shadow: 0 3px 0 0 #11a89b; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; }
     .post-card a.read-more:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #11a89b; }
     .post-card a.read-more:active { transform: translateY(2px); box-shadow: 0 1px 0 0 #11a89b; }
     .profile-card { background: #f7f3df; border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); border: 2px solid #e8e0cc; }
@@ -880,12 +880,14 @@ function getFrontendHTML(settings) {
               '<h2><a href="/post/' + formatDate(post.created_at) + '/' + post.id + '">' + post.title + '</a></h2>' +
               '<p style="color:#725d42;font-size:0.9em;line-height:1.5;margin:8px 0">' + excerpt + '</p>' +
               (tags ? '<div style="margin:8px 0">' + tags + '</div>' : '') +
-              '<div class="meta">' +
-                '<span>' + post.category + '</span>' +
-                '<span>' + post.view_count + ' 阅读</span>' +
-                '<span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span>' +
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
+                '<div class="meta">' +
+                  '<span>' + post.category + '</span>' +
+                  '<span>' + post.view_count + ' 阅读</span>' +
+                  '<span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span>' +
+                '</div>' +
+                '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '" target="_blank">阅读更多</a>' +
               '</div>' +
-              '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '" target="_blank">阅读更多</a>' +
             '</div>' +
           '</article>';
         }).join('');
