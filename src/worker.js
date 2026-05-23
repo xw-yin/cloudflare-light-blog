@@ -1245,16 +1245,15 @@ function getAdminHTML() {
                   <input v-model="form.tags" placeholder="标签1,标签2">
                 </div>
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>状态</label>
-                  <select v-model="form.status">
-                    <option value="draft">草稿</option>
-                    <option value="published">已发布</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>封面图片</label>
+              <div class="form-group">
+                <label>状态</label>
+                <select v-model="form.status" style="max-width:200px">
+                  <option value="draft">草稿</option>
+                  <option value="published">已发布</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>封面图片</label>
                 <div class="cover-upload" @click="$refs.editFileInput.click()" @dragover.prevent @drop.prevent="handleDrop">
                   <input ref="editFileInput" type="file" @change="handleCoverChange" accept="image/*" style="display:none">
                   <div v-if="!coverPreview"><p style="color:#9f927d">点击或拖拽图片到这里</p></div>
@@ -1319,16 +1318,15 @@ function getAdminHTML() {
                 <input v-model="form.tags" placeholder="标签1,标签2">
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>状态</label>
-                <select v-model="form.status">
-                  <option value="draft">草稿</option>
-                  <option value="published">已发布</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>封面图片</label>
+            <div class="form-group">
+              <label>状态</label>
+              <select v-model="form.status" style="max-width:200px">
+                <option value="draft">草稿</option>
+                <option value="published">已发布</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>封面图片</label>
               <div class="cover-upload" @click="$refs.newFileInput.click()" @dragover.prevent @drop.prevent="handleDrop">
                 <input ref="newFileInput" type="file" @change="handleCoverChange" accept="image/*" style="display:none">
                 <div v-if="!coverPreview"><p style="color:#9f927d">点击或拖拽图片到这里</p></div>
