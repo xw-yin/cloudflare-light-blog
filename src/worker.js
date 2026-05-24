@@ -872,7 +872,7 @@ function getFrontendHTML(settings) {
         app.innerHTML = html + posts.map(post => {
           const cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '">' : '<span style="color:#9f927d">暂无封面</span>';
           const tagColors = ['#19c8b9','#f5c31c','#e05a5a','#889df0','#8ac68a','#e59266','#b77dee','#f8a6b2'];
-          const tags = post.tags ? post.tags.split(',').map((t,i) => '<span style="display:inline-block;padding:5px 16px 5px 20px;background:' + tagColors[i % tagColors.length] + ';color:#fff;font-size:0.75em;font-weight:700;margin-right:12px;position:relative;clip-path:polygon(12px 0, 100% 0, 100% 100%, 12px 100%, 0 50%);filter:drop-shadow(3px 4px 6px rgba(0,0,0,0.4));text-shadow:0 1px 2px rgba(0,0,0,0.2)">' + t.trim() + '</span>').join('') : '';
+          const tags = post.tags ? post.tags.split(',').map((t,i) => '<span style="display:inline-block;padding:3px 12px 3px 16px;background:' + tagColors[i % tagColors.length] + ';color:#fff;font-size:0.7em;font-weight:700;margin-right:10px;position:relative;clip-path:polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);filter:drop-shadow(2px 3px 4px rgba(0,0,0,0.35));text-shadow:0 1px 1px rgba(0,0,0,0.15)">' + t.trim() + '</span>').join('') : '';
           const excerpt = post.password ? '🔒 该文章受到密码保护' : (post.content ? post.content.substring(0, 30) + (post.content.length > 30 ? '...' : '') : '');
           return '<article class="post-card">' +
             '<div class="post-cover">' + cover + '</div>' +
