@@ -1312,57 +1312,7 @@ function getAdminHTML() {
               </div>
             </div>
             <!-- 展开编辑区域 -->
-            <div v-if="editingId === post.id" class="card" style="margin-top:0;border-top-left-radius:0;border-top-right-radius:0">
-              <div class="form-row">
-                <div class="form-group">
-                  <label>标题</label>
-                  <input v-model="form.title" placeholder="文章标题">
-                </div>
-                <div class="form-group">
-                  <label>密码（可选）</label>
-                  <input v-model="form.password" type="password" placeholder="留空则无需密码">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>分类</label>
-                  <select v-model="form.category">
-                    <option value="">请选择分类</option>
-                    <option v-for="cat in categories" :key="cat.id" :value="cat.name">{{ cat.name }}</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>标签（逗号分隔）</label>
-                  <input v-model="form.tags" placeholder="标签1,标签2">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>状态</label>
-                  <select v-model="form.status">
-                    <option value="draft">草稿</option>
-                    <option value="published">已发布</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>发布日期</label>
-                  <input type="date" v-model="form.published_at" :max="new Date().toISOString().split('T')[0]">
-                </div>
-              </div>
-              <div class="form-group">
-                <label>封面图片</label>
-                <div class="cover-upload" @click="$refs.editFileInput.click()" @dragover.prevent @drop.prevent="handleDrop">
-                  <input ref="editFileInput" type="file" @change="handleCoverChange" accept="image/*" style="display:none">
-                  <div v-if="!coverPreview"><p style="color:#9f927d">点击或拖拽图片到这里</p></div>
-                  <img v-else :src="coverPreview" style="max-width:200px;max-height:150px;object-fit:cover;border-radius:12px">
-                </div>
-                <div v-if="coverPreview" style="display:flex;gap:10px;margin-top:10px">
-                  <button @click="$refs.editFileInput.click()" style="padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px">更换图片</button>
-                  <button @click="deleteCover" style="padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px">删除图片</button>
-                </div>
-              </div>
-              <div class="form-group">
-              <div class="editor-layout" style="margin-top:16px;padding-top:16px;border-top:2px solid #e8e0cc">
+            <div class="editor-layout" style="margin-top:16px;padding-top:16px;border-top:2px solid #e8e0cc">
                 <div class="editor-main">
                   <div class="form-group">
                     <label>标题</label>
