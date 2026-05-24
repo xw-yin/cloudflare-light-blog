@@ -1381,6 +1381,8 @@ function getAdminHTML() {
         <div v-if="currentPage==='new'">
           <div class="page-header">
             <h2>{{ editingId ? '编辑文章' : '新建文章' }}</h2>
+          </div>
+          <div style="margin-bottom:16px">
             <button class="btn btn-cancel" @click="currentPage='posts';editingId=null">返回列表</button>
           </div>
           <div class="card">
@@ -1480,12 +1482,12 @@ function getAdminHTML() {
             <h2>分类管理</h2>
           </div>
           <div style="margin-bottom:16px">
-            <button class="btn" @click="showCategoryForm = true; editingCategory = null; categoryForm = { name: '', slug: '', description: '' }">添加分类</button>
+            <button class="btn" @click="editingCategory = 'new'; categoryForm = { name: '', slug: '', description: '' }">添加分类</button>
           </div>
           
-          <!-- 分类表单 -->
-          <div v-if="showCategoryForm" class="card" style="margin-bottom:20px">
-            <h3 style="color:#794f27;margin-bottom:16px">{{ editingCategory ? '编辑分类' : '添加分类' }}</h3>
+          <!-- 新建分类表单 -->
+          <div v-if="editingCategory === 'new'" class="card" style="margin-bottom:12px">
+            <h3 style="color:#794f27;margin-bottom:16px">添加分类</h3>
             <div class="form-row">
               <div class="form-group">
                 <label>英文ID（用于URL）</label>
@@ -1502,7 +1504,7 @@ function getAdminHTML() {
             </div>
             <div style="display:flex;gap:10px;justify-content:flex-end">
               <button class="btn" @click="saveCategory">保存</button>
-              <button class="btn btn-cancel" @click="showCategoryForm = false">取消</button>
+              <button class="btn btn-cancel" @click="editingCategory = null">取消</button>
             </div>
           </div>
           
@@ -1511,12 +1513,33 @@ function getAdminHTML() {
             <div class="post-card-mobile" style="display:flex;align-items:center;gap:12px">
               <div class="actions" style="display:flex;gap:6px">
                 <button class="delete" @click="deleteCategory(cat.id)">删除</button>
-                <button class="edit" @click="editCategory(cat)">编辑</button>
+                <button class="edit" @click="editingCategory === cat.id ? editingCategory = null : editCategory(cat)">{{ editingCategory === cat.id ? '收起' : '编辑' }}</button>
               </div>
               <div style="flex:1">
                 <span style="color:#794f27;font-weight:600">{{ cat.name }}</span>
                 <span style="color:#9f927d;font-size:0.85em;margin-left:8px">/{{ cat.slug }}</span>
                 <span v-if="cat.description" style="color:#9f927d;font-size:0.85em;margin-left:8px">- {{ cat.description }}</span>
+              </div>
+            </div>
+            <!-- 展开编辑区域 -->
+            <div v-if="editingCategory === cat.id" style="margin-top:16px;padding-top:16px;border-top:2px solid #e8e0cc">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>英文ID</label>
+                  <input v-model="categoryForm.slug" placeholder="英文ID">
+                </div>
+                <div class="form-group">
+                  <label>中文名称</label>
+                  <input v-model="categoryForm.name" placeholder="中文名称">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>描述</label>
+                <input v-model="categoryForm.description" placeholder="分类描述">
+              </div>
+              <div style="display:flex;gap:10px;justify-content:flex-end">
+                <button class="btn" @click="saveCategory">保存</button>
+                <button class="btn btn-cancel" @click="editingCategory = null">取消</button>
               </div>
             </div>
           </div>
@@ -1629,7 +1652,6 @@ function getAdminHTML() {
         const currentPage = ref('posts');
         const settingsForm = ref({ site_name: '', site_description: '', site_favicon: '', site_avatar: '', site_bio: '', site_links: '', site_author: '', site_footer: '', custom_js: '' });
         const categoryForm = ref({ name: '', slug: '', description: '' });
-        const showCategoryForm = ref(false);
         const editingCategory = ref(null);
 
         const check = () => {
@@ -1729,12 +1751,11 @@ function getAdminHTML() {
           if (!confirmed) return;
           try {
             const data = { ...categoryForm.value };
-            if (editingCategory.value) data.id = editingCategory.value;
+            if (editingCategory.value && editingCategory.value !== 'new') data.id = editingCategory.value;
             await api('/api/category', { method: 'POST', data });
             await loadCategories();
-            showCategoryForm.value = false;
-            categoryForm.value = { name: '', slug: '', description: '' };
             editingCategory.value = null;
+            categoryForm.value = { name: '', slug: '', description: '' };
             showToast('保存成功');
           } catch(e) { alert('保存失败'); }
         };
@@ -1742,7 +1763,6 @@ function getAdminHTML() {
         const editCategory = (cat) => {
           editingCategory.value = cat.id;
           categoryForm.value = { name: cat.name, slug: cat.slug, description: cat.description || '' };
-          showCategoryForm.value = true;
         };
 
         const deleteCategory = async (id) => {
@@ -1836,7 +1856,7 @@ function getAdminHTML() {
           setTimeout(() => { textarea.focus(); textarea.selectionStart = start + insert.length; textarea.selectionEnd = start + insert.length; }, 0);
         };
 
-        return { logged, password, login, logout, posts, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, toggleEdit, handleCoverChange, handleDrop, savePost, deletePost, deleteCover, categories, currentPage, categoryForm, saveCategory, deleteCategory, editCategory, showCategoryForm, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, insertMd, trashPosts, restorePost, permanentDelete, emptyTrash, confirmModal, showConfirm, sidebarCollapsed };
+        return { logged, password, login, logout, posts, editingId, form, coverPreview, toast, uploading, uploadProgress, openAdd, toggleEdit, handleCoverChange, handleDrop, savePost, deletePost, deleteCover, categories, currentPage, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleFavicon, handleFaviconDrop, handleAvatar, handleAvatarDrop, insertMd, trashPosts, restorePost, permanentDelete, emptyTrash, confirmModal, showConfirm, sidebarCollapsed };
       }
     }).mount('#app');
   <\/script>
