@@ -1235,6 +1235,14 @@ function getAdminHTML() {
       .btn-cancel { padding: 10px 20px; font-size: 14px; }
       .actions .edit, .actions .delete { padding: 5px 10px; font-size: 12px; }
       .category-item { padding: 10px 12px; border-radius: 10px; }
+    .editor-layout { display: flex; gap: 20px; align-items: flex-start; }
+    .editor-main { flex: 7; }
+    .editor-side { flex: 3; position: sticky; top: 20px; }
+    @media (max-width: 768px) {
+      .editor-layout { flex-direction: column; }
+      .editor-main, .editor-side { width: 100%; }
+      .editor-side { position: static; }
+    }
       .post-card-mobile { display: flex; flex-direction: column; }
       .post-card-mobile .actions { order: -1; margin-bottom: 8px; }
     }
