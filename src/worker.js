@@ -1426,16 +1426,11 @@ function getAdminHTML() {
             case 'italic': insert = '*' + (selected || '斜体') + '*'; break;
             case 'link': insert = '[' + (selected || '链接') + '](https://)'; break;
             case 'image': insert = '![' + (selected || '图片') + '](https://)'; break;
-            case 'code': insert = selected.includes('\
-') ? '```\
-' + (selected || '代码') + '\
-```' : '`' + (selected || '代码') + '`'; break;
+            case 'code': var hasNL = selected.indexOf(String.fromCharCode(10)) >= 0; var cb = String.fromCharCode(96)+String.fromCharCode(96)+String.fromCharCode(96); insert = hasNL ? cb + String.fromCharCode(10) + (selected || '代码') + String.fromCharCode(10) + cb : String.fromCharCode(96) + (selected || '代码') + String.fromCharCode(96); break;
             case 'ul': insert = '- ' + (selected || '列表项'); break;
             case 'ol': insert = '1. ' + (selected || '列表项'); break;
             case 'quote': insert = '> ' + (selected || '引用'); break;
-            case 'hr': insert = '\
----\
-'; break;
+            case 'hr': insert = String.fromCharCode(10) + '---' + String.fromCharCode(10); break;
           }
           form.value.content = text.substring(0, start) + insert + text.substring(end);
           setTimeout(() => { ta.focus(); ta.selectionStart = ta.selectionEnd = start + insert.length; }, 0);
