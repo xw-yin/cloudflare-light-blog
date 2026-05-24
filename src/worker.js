@@ -1626,8 +1626,6 @@ function getAdminHTML() {
       </div>
     </div>
     
-
-    
     <!-- 确认弹框 -->
     <div v-if="confirmModal.show" class="modal" @click.self="confirmModal.show = false">
       <div class="modal-box" style="max-width:400px;text-align:center;padding:32px">
