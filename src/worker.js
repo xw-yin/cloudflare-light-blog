@@ -1344,14 +1344,16 @@ function getAdminHTML() {
                 <div class="form-group"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
                 <div class="form-group">
                   <label>网站图标（建议ICO格式）</label>
-                  <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="padding:16px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8">
-                    <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
-                    <div v-if="!settingsForm.site_favicon"><p style="color:#9f927d;font-size:13px">点击或拖拽上传ICO图标</p></div>
-                    <img v-else :src="settingsForm.site_favicon" style="width:32px">
-                  </div>
-                  <div v-if="settingsForm.site_favicon" style="display:flex;gap:6px;margin-top:6px">
-                    <button @click="$refs.faviconInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
-                    <button @click="settingsForm.site_favicon=''" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
+                  <div style="display:flex;gap:12px">
+                    <div class="cover-upload" @click="$refs.faviconInput.click()" @dragover.prevent @drop.prevent="handleFaviconDrop" style="flex:1;padding:20px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;min-height:80px;display:flex;align-items:center;justify-content:center">
+                      <input ref="faviconInput" type="file" @change="handleFavicon" accept=".ico,image/*" style="display:none">
+                      <div v-if="!settingsForm.site_favicon"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
+                      <img v-else :src="settingsForm.site_favicon" style="width:40px;height:40px">
+                    </div>
+                    <div v-if="settingsForm.site_favicon" style="display:flex;flex-direction:column;gap:8px;justify-content:center">
+                      <button @click="$refs.faviconInput.click()" style="padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b;white-space:nowrap">更换</button>
+                      <button @click="settingsForm.site_favicon=''" style="padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444;white-space:nowrap">删除</button>
+                    </div>
                   </div>
                 </div>
                 <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
@@ -1364,14 +1366,16 @@ function getAdminHTML() {
                 <div class="form-group"><label>个人名称</label><input v-model="settingsForm.site_author"></div>
                 <div class="form-group">
                   <label>个人头像</label>
-                  <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="padding:16px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8">
-                    <input ref="avatarInput" type="file" @change="handleAvatar" accept="image/*" style="display:none">
-                    <div v-if="!settingsForm.site_avatar"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
-                    <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
-                  </div>
-                  <div v-if="settingsForm.site_avatar" style="display:flex;gap:6px;margin-top:6px">
-                    <button @click="$refs.avatarInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
-                    <button @click="settingsForm.site_avatar=''" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
+                  <div style="display:flex;gap:12px">
+                    <div class="cover-upload" @click="$refs.avatarInput.click()" @dragover.prevent @drop.prevent="handleAvatarDrop" style="flex:1;padding:20px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8;min-height:100px;display:flex;align-items:center;justify-content:center">
+                      <input ref="avatarInput" type="file" @change="handleAvatar" accept="image/*" style="display:none">
+                      <div v-if="!settingsForm.site_avatar"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
+                      <img v-else :src="settingsForm.site_avatar" style="width:64px;height:64px;border-radius:50%">
+                    </div>
+                    <div v-if="settingsForm.site_avatar" style="display:flex;flex-direction:column;gap:8px;justify-content:center">
+                      <button @click="$refs.avatarInput.click()" style="padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b;white-space:nowrap">更换</button>
+                      <button @click="settingsForm.site_avatar=''" style="padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444;white-space:nowrap">删除</button>
+                    </div>
                   </div>
                 </div>
                 <div class="form-group"><label>个人简介</label><textarea v-model="settingsForm.site_bio" rows="3"></textarea></div>
