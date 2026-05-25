@@ -1159,7 +1159,7 @@ function getAdminHTML() {
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #794f27; }
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 18px; border: 2.5px solid #c4b89e; border-radius: 50px; font-size: 14px; background: #f8f8f0; color: #725d42; box-shadow: 0 3px 0 0 #d4c9b4; }
-    .form-group textarea { border-radius: 18px; min-height: 80px; }
+    .form-group textarea { border-radius: 18px; min-height: 80px; resize: vertical; }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .actions { display: flex; gap: 6px; }
     .actions button { padding: 6px 14px; border: none; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; }
@@ -1340,8 +1340,10 @@ function getAdminHTML() {
             <div class="editor-main">
               <div class="card">
                 <h3 style="color:#794f27;margin-bottom:16px">网站设置</h3>
-                <div class="form-group"><label>网站标题</label><input v-model="settingsForm.site_name"></div>
-                <div class="form-group"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
+                <div style="display:flex;gap:16px">
+                  <div class="form-group" style="width:35%"><label>网站标题</label><input v-model="settingsForm.site_name"></div>
+                  <div class="form-group" style="flex:1"><label>网站副标题</label><input v-model="settingsForm.site_description"></div>
+                </div>
                 <div class="form-group">
                   <label>网站图标（建议ICO格式）</label>
                   <div style="display:flex;gap:12px">
