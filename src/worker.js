@@ -1158,7 +1158,7 @@ function getAdminHTML() {
     .card { background: var(--card-bg, #f7f3df); border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107,92,67,0.42); border: 2px solid var(--card-border, #e8e0cc); margin-bottom: 16px; }
     .form-group { margin-bottom: 18px; }
     .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #794f27; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 18px; border: 2.5px solid var(--input-border, #c4b89e); border-radius: 50px; font-size: 14px; background: #f8f8f0; color: var(--text-body, #725d42); box-shadow: 0 3px 0 0 var(--input-shadow, #d4c9b4); font-weight: 500; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 18px; border: 2.5px solid var(--input-border, #c4b89e); border-radius: 50px; font-size: 14px; background-color: #f8f8f0; color: var(--text-body, #725d42); box-shadow: 0 3px 0 0 var(--input-shadow, #d4c9b4); font-weight: 500; }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800; outline: none; }
     .form-group textarea { border-radius: 18px; min-height: 80px; resize: vertical; }
     .form-group select { 
@@ -1171,6 +1171,14 @@ function getAdminHTML() {
       background-position: right 16px center !important;
       padding-right: 40px !important; 
       cursor: pointer; 
+      border-radius: 50px !important;
+      border: 2.5px solid #c4b89e !important;
+    }
+    select.form-control,
+    .form-group select,
+    div select {
+      appearance: none !important;
+      -webkit-appearance: none !important;
     }
     .form-group select:hover { 
       border-color: #a89878; 
