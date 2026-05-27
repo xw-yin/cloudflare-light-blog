@@ -776,11 +776,12 @@ function getFrontendHTML(settings) {
       cursor: pointer;
       box-shadow: 0 4px 0 0 #11a89b;
       transition: all 0.25s;
-      display: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 998;
     }
     .back-to-top:hover { transform: translateY(-2px); box-shadow: 0 6px 0 0 #11a89b; }
-    .back-to-top.show { display: flex; align-items: center; justify-content: center; }
     
     .mobile-nav-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 1004; width: 40px; height: 40px; background: #19c8b9; border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 3px 0 #11a89b; transition: left 0.3s; }
     .mobile-nav-toggle.nav-open { left: 208px !important; }
@@ -859,18 +860,6 @@ function getFrontendHTML(settings) {
       }
     });
     
-    // 返回顶部
-    window.addEventListener('scroll', function() {
-      var btn = document.querySelector('.back-to-top');
-      if (btn) {
-        if (window.scrollY > 300) {
-          btn.classList.add('show');
-        } else {
-          btn.classList.remove('show');
-        }
-      }
-    });
-    
     function toggleNav() {
       var sidebar = document.querySelector('.sidebar');
       var btn = document.querySelector('.mobile-nav-toggle');
@@ -881,18 +870,6 @@ function getFrontendHTML(settings) {
     }
   </script>
   <script>
-    // 返回顶部
-    window.addEventListener('scroll', function() {
-      var btn = document.querySelector('.back-to-top');
-      if (btn) {
-        if (window.scrollY > 300) {
-          btn.classList.add('show');
-        } else {
-          btn.classList.remove('show');
-        }
-      }
-    });
-    
     fetch('/api/stats').then(r=>r.json()).then(s=>{
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
@@ -909,18 +886,6 @@ function getFrontendHTML(settings) {
         list.innerHTML = links.map(l=>'<a href="'+l.url+'" target="_blank">'+l.name+'</a>').join('');
       }
     });
-    // 返回顶部
-    window.addEventListener('scroll', function() {
-      var btn = document.querySelector('.back-to-top');
-      if (btn) {
-        if (window.scrollY > 300) {
-          btn.classList.add('show');
-        } else {
-          btn.classList.remove('show');
-        }
-      }
-    });
-    
     // 返回顶部
     window.addEventListener('scroll', function() {
       var btn = document.querySelector('.back-to-top');
@@ -1127,11 +1092,12 @@ function getPostHTML(post, settings) {
       cursor: pointer;
       box-shadow: 0 4px 0 0 #11a89b;
       transition: all 0.25s;
-      display: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 998;
     }
     .back-to-top:hover { transform: translateY(-2px); box-shadow: 0 6px 0 0 #11a89b; }
-    .back-to-top.show { display: flex; align-items: center; justify-content: center; }
     
     .mobile-nav-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 1004; width: 40px; height: 40px; background: #19c8b9; border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 3px 0 #11a89b; transition: left 0.3s; }
     .mobile-nav-toggle.nav-open { left: 208px !important; }
