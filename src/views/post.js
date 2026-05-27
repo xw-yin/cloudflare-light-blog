@@ -235,16 +235,27 @@ export function getPostHTML(post, settings) {
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
   <style>
-    pre { background: linear-gradient(135deg, #2d2d2d, #1e1e1e); border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; border: 2px solid #404040; box-shadow: 0 4px 12px rgba(0,0,0,0.15); position: relative; }
-    pre::before { content: 'code'; position: absolute; top: 8px; right: 12px; font-size: 11px; color: #6d6d6d; font-family: monospace; }
-    pre code { font-family: 'Fira Code', 'Consolas', monospace; font-size: 14px; line-height: 1.7; color: #e0e0e0; background: none; padding: 0; }
-    code { font-family: 'Fira Code', 'Consolas', monospace; background: linear-gradient(135deg, #f5f0e8, #ede5d5); color: #c0392b; padding: 3px 10px; border-radius: 8px; font-size: 0.88em; border: 1.5px solid #e0d8c8; }
-    .hljs-keyword, .hljs-selector-tag { color: #c678dd; }
-    .hljs-string, .hljs-attr { color: #98c379; }
-    .hljs-number, .hljs-literal { color: #d19a66; }
-    .hljs-comment { color: #5c6370; font-style: italic; }
-    .hljs-function .hljs-title, .hljs-title.function_ { color: #61afef; }
-    .hljs-built_in { color: #e5c07b; }
+    pre { background: #0d1117; border-radius: 12px; padding: 20px; overflow-x: auto; margin: 16px 0; border: 1px solid #30363d; box-shadow: 0 4px 16px rgba(0,0,0,0.3); position: relative; }
+    pre::before { content: ''; position: absolute; top: 12px; left: 16px; width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840; }
+    pre code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; font-size: 14px; line-height: 1.7; color: #e6edf3; background: none; padding: 0; border: none; border-radius: 0; box-shadow: none; display: block; padding-top: 20px; }
+    code { font-family: 'Fira Code', 'Consolas', 'Monaco', monospace; background: #1b2230; color: #e6edf3; padding: 3px 10px; border-radius: 6px; font-size: 0.88em; border: 1px solid #30363d; }
+    .hljs-keyword, .hljs-selector-tag { color: #ff7b72; }
+    .hljs-string, .hljs-attr { color: #a5d6ff; }
+    .hljs-number, .hljs-literal { color: #79c0ff; }
+    .hljs-comment { color: #8b949e; font-style: italic; }
+    .hljs-function .hljs-title, .hljs-title.function_ { color: #d2a8ff; }
+    .hljs-built_in { color: #ffa657; }
+    .hljs-type, .hljs-class .hljs-title { color: #ffa657; }
+    .hljs-params { color: #e6edf3; }
+    .hljs-meta { color: #79c0ff; }
+    .hljs-punctuation { color: #8b949e; }
+    .hljs-property { color: #79c0ff; }
+    .hljs-title { color: #d2a8ff; }
+    .hljs-emphasis { font-style: italic; color: #ffa657; }
+    .hljs-strong { font-weight: bold; color: #ffa657; }
+    .hljs-link { color: #a5d6ff; text-decoration: underline; }
+    .hljs-addition { color: #aff5b4; background: rgba(46,160,67,0.15); }
+    .hljs-deletion { color: #ffdcd7; background: rgba(248,81,73,0.15); }
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
