@@ -261,22 +261,36 @@ export function getPostHTML(post, settings) {
     document.addEventListener('DOMContentLoaded', function() {
       var content = ${JSON.stringify(post.content)};
       marked.setOptions({ breaks: true, gfm: true });
-      var html = marked.parse(content);
-
-      // 后处理：转义 <pre><code> 内的 HTML 标签（防止代码被执行）
-      var preParts = html.split('<pre>');
-      for (var i = 1; i < preParts.length; i++) {
-        var endPre = preParts[i].indexOf('</pre>');
-        if (endPre === -1) continue;
-        var preContent = preParts[i].substring(0, endPre);
-        var afterPre = preParts[i].substring(endPre);
-        // 转义 code 块内未转义的 < 和 >
-        preContent = preContent.replace(/<(?!\/?code( |>|\/))([^>]*?)>/g, function(m) {
-          return m.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        });
-        preParts[i] = preContent + afterPre;
+      // 安全解析 markdown
+      var html;
+      if (typeof marked !== 'undefined' && marked.parse) {
+        html = marked.parse(content);
+      } else {
+        html = '<pre><code>' + content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</code></pre>';
       }
-      html = preParts.join('<pre>');
+
+      // 后处理：转义 <pre><code> 内未转义的 HTML 标签（不用正则）
+      var tag = '&lt;';
+      var closeTag = '&gt;';
+      var result = '';
+      var inPre = false;
+      var i = 0;
+      while (i < html.length) {
+        if (!inPre && html.substring(i, i+5) === '<pre>') { inPre = true; result += '<pre>'; i += 5; continue; }
+        if (inPre && html.substring(i, i+6) === '</pre>') { inPre = false; result += '</pre>'; i += 6; continue; }
+        if (inPre && html[i] === '<') {
+          var end = html.indexOf('>', i);
+          if (end !== -1) {
+            var t = html.substring(i+1, end).trim().toLowerCase();
+            if (t === 'code' || t === '/code' || t.indexOf('code ') === 0) {
+              result += html.substring(i, end+1); i = end+1; continue;
+            }
+            result += tag + html.substring(i+1, end) + closeTag; i = end+1; continue;
+          }
+        }
+        result += html[i]; i++;
+      }
+      html = result;
 
       document.getElementById('post-content').innerHTML = html;
       document.querySelectorAll('pre code').forEach(function(block) { hljs.highlightElement(block); });
