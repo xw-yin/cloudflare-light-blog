@@ -259,41 +259,55 @@ export function getPostHTML(post, settings) {
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var content = ${JSON.stringify(post.content)};
-      marked.setOptions({ breaks: true, gfm: true });
-      // 安全解析 markdown
+      var raw = ${JSON.stringify(post.content)};
+      var fence = String.fromCharCode(96)+String.fromCharCode(96)+String.fromCharCode(96);
+      var tick = String.fromCharCode(96);
+      var nl = String.fromCharCode(10);
+
+      // 第一步：提取代码块，转义其中的 HTML，用占位符替换
+      var codeBlocks = [];
+      var content = raw;
+      while (true) {
+        var fenceStart = content.indexOf(nl + fence);
+        if (fenceStart === -1) fenceStart = content.indexOf(fence);
+        if (fenceStart === -1) break;
+        var afterFence = content.indexOf(fence, fenceStart + fence.length);
+        if (afterFence === -1) break;
+        var codeContent = content.substring(fenceStart + fence.length, afterFence);
+        // 去掉语言标识行
+        var firstNl = codeContent.indexOf(nl);
+        if (firstNl !== -1) codeContent = codeContent.substring(firstNl + 1);
+        // 转义 HTML
+        var escaped = codeContent.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var idx = codeBlocks.length;
+        codeBlocks.push(escaped);
+        content = content.substring(0, fenceStart) + nl + '%%CODEBLOCK_' + idx + '%%' + nl + content.substring(afterFence + fence.length);
+      }
+
+      // 第二步：用 marked 解析（代码块已被占位符替换，不会有 HTML 问题）
       var html;
       if (typeof marked !== 'undefined' && marked.parse) {
+        marked.setOptions({ breaks: true, gfm: true });
         html = marked.parse(content);
       } else {
-        html = '<pre><code>' + content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</code></pre>';
+        html = '<p>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/
+/g, '<br>') + '</p>';
       }
 
-      // 后处理：转义 <pre><code> 内未转义的 HTML 标签（不用正则）
-      var tag = '&lt;';
-      var closeTag = '&gt;';
-      var result = '';
-      var inPre = false;
-      var i = 0;
-      while (i < html.length) {
-        if (!inPre && html.substring(i, i+5) === '<pre>') { inPre = true; result += '<pre>'; i += 5; continue; }
-        if (inPre && html.substring(i, i+6) === '</pre>') { inPre = false; result += '</pre>'; i += 6; continue; }
-        if (inPre && html[i] === '<') {
-          var end = html.indexOf('>', i);
-          if (end !== -1) {
-            var t = html.substring(i+1, end).trim().toLowerCase();
-            if (t === 'code' || t === '/code' || t.indexOf('code ') === 0) {
-              result += html.substring(i, end+1); i = end+1; continue;
-            }
-            result += tag + html.substring(i+1, end) + closeTag; i = end+1; continue;
+      // 第三步：还原代码块，用 <pre><code> 包裹 + 语法高亮
+      for (var j = 0; j < codeBlocks.length; j++) {
+        var placeholder = '%%CODEBLOCK_' + j + '%%';
+        var highlighted = codeBlocks[j];
+        try {
+          if (typeof hljs !== 'undefined') {
+            highlighted = hljs.highlightAuto(codeBlocks[j].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')).value;
           }
-        }
-        result += html[i]; i++;
+        } catch(e) { highlighted = codeBlocks[j]; }
+        var block = '<pre><code class="hljs">' + highlighted + '</code></pre>';
+        html = html.replace(placeholder, block);
       }
-      html = result;
 
       document.getElementById('post-content').innerHTML = html;
-      document.querySelectorAll('pre code').forEach(function(block) { hljs.highlightElement(block); });
       initLightbox();
     });
   </script>
