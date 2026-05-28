@@ -121,6 +121,12 @@ async function handleGetPosts(request, env) {
   const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get('limit')) || 10));
   const offset = (page - 1) * limit;
 
+  // 缓存 60 秒
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), { method: 'GET' });
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
   let where = "WHERE status='published'";
   const params = [];
 
@@ -144,15 +150,16 @@ async function handleGetPosts(request, env) {
     `SELECT id, title, slug, excerpt, cover_image, category, tags, view_count, created_at, password FROM posts ${where} ORDER BY created_at DESC LIMIT ? OFFSET ?`
   ).bind(...params, limit, offset).all();
 
-  return json({
+  const resp = json({
     data: results,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit)
-    }
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
   });
+  resp.headers.set('Cache-Control', 'public, max-age=60');
+  const cloned = resp.clone();
+  if (typeof ctx !== 'undefined' && ctx.waitUntil) {
+    ctx.waitUntil(cache.put(cacheKey, cloned));
+  }
+  return resp;
 }
 
 /**
@@ -179,7 +186,9 @@ async function handleGetPost(request, env) {
  */
 async function handleGetCategories(env) {
   const { results } = await env.DB.prepare("SELECT * FROM categories ORDER BY name").all();
-  return json(results || []);
+  const resp = json(results || []);
+  resp.headers.set('Cache-Control', 'public, max-age=300');
+  return resp;
 }
 
 /**
@@ -198,10 +207,12 @@ async function handleGetStats(env) {
     env.DB.prepare("SELECT COUNT(*) as cnt FROM posts WHERE status='published'").first(),
     env.DB.prepare("SELECT COUNT(*) as cnt FROM categories").first()
   ]);
-  return json({
+  const resp = json({
     postCount: postCount?.cnt ?? 0,
     catCount: catCount?.cnt ?? 0
   });
+  resp.headers.set('Cache-Control', 'public, max-age=60');
+  return resp;
 }
 
 /**
@@ -280,6 +291,8 @@ async function handleAdminGetPosts(env) {
 
 async function handleCreatePost(request, env) {
   const body = await request.json();
+  if (!body.title || !body.title.trim()) return errorResponse('标题不能为空', 400);
+  if (!body.content || !body.content.trim()) return errorResponse('内容不能为空', 400);
   const slug = body.slug || generateSlug(body.title);
 
   let coverImage = body.cover_image;
@@ -317,6 +330,8 @@ async function handleUpdatePost(request, env) {
   if (!id) return errorResponse('缺少 id', 400);
 
   const body = await request.json();
+  if (!body.title || !body.title.trim()) return errorResponse('标题不能为空', 400);
+  if (!body.content || !body.content.trim()) return errorResponse('内容不能为空', 400);
   let coverImage = body.cover_image;
   if (coverImage && coverImage.startsWith('data:')) {
     const { uploadImage } = await import('./lib/image.js');

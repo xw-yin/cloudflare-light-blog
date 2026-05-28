@@ -1,7 +1,7 @@
 // ==================== Cloudflare Light Blog - 主入口 ====================
 // 模块化架构 | HMAC 认证 | 分页 | 缓存 | SEO
 
-import { html, errorResponse, handleOptions, corsHeaders } from './lib/utils.js';
+import { html, errorResponse, handleOptions, getCorsHeaders } from './lib/utils.js';
 import { initDB, getSettings } from './lib/db.js';
 import { authenticateRequest } from './lib/auth.js';
 import { handleImage } from './lib/image.js';
@@ -12,23 +12,31 @@ import { getPostHTML } from './views/post.js';
 import { getPasswordHTML } from './views/password.js';
 import { getAdminHTML } from './views/admin.js';
 
-// 数据库初始化标志（同一 Worker 实例内共享）
-let dbInitialized = false;
+// 数据库初始化状态缓存
+let dbInitPromise = null;
+
+function ensureDB(env) {
+  if (!dbInitPromise) {
+    dbInitPromise = initDB(env).catch(e => {
+      dbInitPromise = null; // 失败时重置，允许重试
+      throw e;
+    });
+  }
+  return dbInitPromise;
+}
 
 export default {
   async fetch(request, env, ctx) {
     // 处理 CORS 预检请求
-    const optionsResponse = handleOptions(request);
+    const optionsResponse = handleOptions(request, env);
     if (optionsResponse) return optionsResponse;
 
     const url = new URL(request.url);
     const path = url.pathname;
 
     try {
-      // 初始化数据库（幂等操作，同一实例只执行一次）
-      if (!dbInitialized) {
-        dbInitialized = await initDB(env);
-      }
+      // 初始化数据库（幂等操作，Promise 缓存避免重复执行）
+      await ensureDB(env);
 
       // ========== 路由分发 ==========
 

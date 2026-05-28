@@ -23,12 +23,21 @@ export async function cacheResponse(request, response, ttl = DEFAULT_TTL) {
 }
 
 /**
- * 清除匹配模式的缓存
+ * 清除指定 URL 的缓存
  */
-export async function purgeCache(pattern) {
-  // Workers Cache API 不支持批量删除按模式匹配
-  // 这里只是标记，实际清除需要通过 cache.delete
-  console.log(`[Cache] Purge requested for pattern: ${pattern}`);
+export async function purgeCache(url) {
+  const cache = caches.default;
+  await cache.delete(new Request(url));
+}
+
+/**
+ * 清除所有页面缓存
+ */
+export async function purgeAllCache(urls) {
+  const cache = caches.default;
+  for (const url of urls) {
+    await cache.delete(new Request(url));
+  }
 }
 
 /**

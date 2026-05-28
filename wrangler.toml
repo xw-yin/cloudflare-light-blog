@@ -18,6 +18,10 @@ database_id = "a55bc271-25cb-4a47-a4aa-5dca0d176933"
 binding = "R2"
 bucket_name = "blog-images"
 
+# CORS 配置（设置为你的博客域名，或保留 * 允许所有来源）
+[vars]
+ALLOWED_ORIGIN = "*"
+
 [observability]
 enabled = true
 

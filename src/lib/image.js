@@ -93,8 +93,8 @@ export async function handleUpload(request, env) {
       return { error: '没有文件', status: 400 };
     }
 
-    // 文件大小限制（10MB）
-    const MAX_SIZE = 10 * 1024 * 1024;
+    // 文件大小限制（1MB）
+    const MAX_SIZE = 1 * 1024 * 1024;
     const arrayBuffer = await file.arrayBuffer();
     if (arrayBuffer.byteLength > MAX_SIZE) {
       return { error: '文件大小不能超过 10MB', status: 400 };

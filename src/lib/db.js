@@ -96,7 +96,18 @@ export async function initDB(env) {
       `).run();
     }
 
-    // ========== 4. 插入默认设置（批量操作）==========
+    // ========== 4. 创建索引 ==========
+    try {
+      await DB.prepare("CREATE INDEX IF NOT EXISTS idx_posts_status ON posts(status)").run();
+      await DB.prepare("CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC)").run();
+      await DB.prepare("CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug)").run();
+      await DB.prepare("CREATE INDEX IF NOT EXISTS idx_posts_category ON posts(category)").run();
+      console.log('[DB] 索引创建完成');
+    } catch (e) {
+      console.error('[DB] 索引创建失败:', e);
+    }
+
+    // ========== 5. 插入默认设置（批量操作）==========
     const defaultSettings = [
       ['site_name', '我的博客'],
       ['site_description', '一个使用 Cloudflare 构建的博客'],

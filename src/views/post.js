@@ -263,7 +263,7 @@ export function getPostHTML(post, settings) {
   </style>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      var raw = ${JSON.stringify(post.content)};
+      var raw = ${JSON.stringify((post.content || '').split('</script>').join('<\\/script>'))};
       var fence = String.fromCharCode(96)+String.fromCharCode(96)+String.fromCharCode(96);
       var tick = String.fromCharCode(96);
       var nl = String.fromCharCode(10);

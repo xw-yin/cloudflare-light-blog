@@ -72,20 +72,23 @@ export function escapeHtml(str) {
 }
 
 /**
- * CORS 头
+ * 获取 CORS 头（根据环境变量动态配置）
  */
-export const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-};
+export function getCorsHeaders(env) {
+  const origin = (env && env.ALLOWED_ORIGIN) || '*';
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
+}
 
 /**
  * 处理 OPTIONS 预检请求
  */
-export function handleOptions(request) {
+export function handleOptions(request, env) {
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: getCorsHeaders(env) });
   }
   return null;
 }
