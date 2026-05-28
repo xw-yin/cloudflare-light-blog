@@ -318,7 +318,7 @@ export function getPostHTML(post, settings) {
 
       // 第三步：还原代码块，用 <pre><code> 包裹 + 语法高亮
       for (var j = 0; j < codeBlocks.length; j++) {
-        var placeholder = '%%CODEBLOCK_' + j + '%%';
+        var placeholder = '%%CB_' + j + '%%';
         var highlighted = codeBlocks[j];
         try {
           if (typeof hljs !== 'undefined') {

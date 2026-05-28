@@ -184,72 +184,92 @@ export function getAdminHTML() {
         <div v-if="currentPage==='posts'">
           <div class="page-header"><h2>文章管理</h2></div>
           <button class="btn" @click="openAdd()" style="margin-bottom:16px">新建文章</button>
-          <div v-for="post in posts" :key="post.id" class="card">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="actions"><button class="delete" @click="deletePost(post.id)">删除</button><button class="edit" @click="toggleEdit(post)">{{editingId===post.id?'收起':'编辑'}}</button></div>
-              <h3 style="flex:1;color:#794f27">{{post.title}}</h3>
-              <span style="color:#9f927d">{{post.category}}</span>
-              <span style="color:#9f927d">{{new Date(post.created_at).toLocaleDateString('zh-CN')}}</span>
-            </div>
-            <div v-if="editingId===post.id" style="margin-top:16px;padding-top:16px;border-top:2px solid #e8e0cc">
-              <div class="editor-layout">
-                <div class="editor-main" style="display:flex;flex-direction:column">
-                  <div class="form-group"><label>标题</label><input v-model="form.title"></div>
-                  <div class="form-group" style="flex:1;display:flex;flex-direction:column">
-                    <label>内容</label>
-                    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-                      <button type="button" @click="insertMd('heading')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#725d42">标题</button>
-                      <button type="button" @click="insertMd('bold')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;color:#725d42">B</button>
-                      <button type="button" @click="insertMd('italic')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;font-style:italic;color:#725d42">I</button>
-                      <button type="button" @click="insertMd('link')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">🔗</button>
-                      <button type="button" @click="insertMd('image')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">🖼</button>
-                      <button type="button" @click="insertMd('code')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">代码</button>
-                      <button type="button" @click="insertMd('ul')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">•列表</button>
-                      <button type="button" @click="insertMd('ol')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">1.序号</button>
-                      <button type="button" @click="insertMd('quote')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">❝引用</button>
-                      <button type="button" @click="insertMd('hr')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">—分割线</button>
-                    </div>
-                    <textarea v-model="form.content" style="flex:1;min-height:200px"></textarea>
-                  </div>
-                  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn" @click="savePost">保存</button><button class="btn btn-cancel" @click="editingId=null">取消</button></div>
-                </div>
-                <div class="editor-side">
-                  <div class="form-group"><label>状态</label>
-                <div class="custom-select" @click.stop>
-                  <div class="custom-select-trigger" :class="{active: customSelects['status']}" @click="toggleSelect('status')">{{ form.status === 'draft' ? '草稿' : '已发布' }}</div>
-                  <div class="custom-select-dropdown" :class="{show: customSelects['status']}">
-                    <div class="custom-select-option" :class="{selected: form.status==='draft'}" @click="selectOption('status', 'draft', 'status')">草稿</div>
-                    <div class="custom-select-option" :class="{selected: form.status==='published'}" @click="selectOption('status', 'published', 'status')">已发布</div>
-                  </div>
-                </div>
-              </div>
-                  <div class="form-group"><label>日期</label><input type="date" v-model="form.published_at"></div>
-                  <div class="form-group"><label>分类</label>
-                <div class="custom-select" @click.stop>
-                  <div class="custom-select-trigger" :class="{active: customSelects['category']}" @click="toggleSelect('category')">{{ form.category || '请选择' }}</div>
-                  <div class="custom-select-dropdown" :class="{show: customSelects['category']}">
-                    <div class="custom-select-option" @click="selectOption('category', '', 'category')">请选择</div>
-                    <div v-for="cat in categories" :key="cat.id" class="custom-select-option" :class="{selected: form.category===cat.name}" @click="selectOption('category', cat.name, 'category')">{{ cat.name }}</div>
-                  </div>
-                </div>
-              </div>
-                  <div class="form-group"><label>标签</label><input v-model="form.tags" placeholder="用英文逗号隔开"></div>
-                  <div class="form-group"><label>密码（可选）</label><input v-model="form.password" type="password" placeholder="留空无需密码"></div>
-                  <div class="form-group">
-                    <label>封面图片</label>
-                    <div class="cover-upload" @click="$refs.editFileInput.click()" @dragover.prevent @drop.prevent="handleDrop" style="padding:16px">
-                      <input ref="editFileInput" type="file" @change="handleCoverChange" accept="image/*" style="display:none">
-                      <div v-if="!coverPreview"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
-                      <img v-else :src="coverPreview" style="max-width:100%;border-radius:8px">
-                    </div>
-                    <div v-if="coverPreview" style="display:flex;gap:6px;margin-top:6px">
-                      <button @click="$refs.editFileInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
-                      <button @click="deleteCover" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#f0e8d8">
+                  <th style="padding:12px 16px;text-align:left;color:#794f27;font-weight:700;font-size:13px;width:60px">删除</th>
+                  <th style="padding:12px 16px;text-align:left;color:#794f27;font-weight:700;font-size:13px;width:60px">编辑</th>
+                  <th style="padding:12px 16px;text-align:left;color:#794f27;font-weight:700;font-size:13px">文章标题</th>
+                  <th style="padding:12px 16px;text-align:left;color:#794f27;font-weight:700;font-size:13px;width:100px">分类</th>
+                  <th style="padding:12px 16px;text-align:center;color:#794f27;font-weight:700;font-size:13px;width:80px">状态</th>
+                  <th style="padding:12px 16px;text-align:right;color:#794f27;font-weight:700;font-size:13px;width:120px">发布日期</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="post in posts" :key="post.id">
+                  <tr style="border-top:1px solid #e8e0cc">
+                    <td style="padding:10px 16px"><button class="delete" @click="deletePost(post.id)" style="padding:4px 10px;font-size:12px">删除</button></td>
+                    <td style="padding:10px 16px"><button class="edit" @click="toggleEdit(post)" style="padding:4px 10px;font-size:12px">{{editingId===post.id?'收起':'编辑'}}</button></td>
+                    <td style="padding:10px 16px;color:#794f27;font-weight:600;font-size:14px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{post.title}}</td>
+                    <td style="padding:10px 16px;color:#9f927d;font-size:13px">{{post.category}}</td>
+                    <td style="padding:10px 16px;text-align:center"><span :style="{display:'inline-block',width:'8px',height:'8px',borderRadius:'50%',background:post.status==='published'?'#22c55e':'#9f927d'}"></span></td>
+                    <td style="padding:10px 16px;text-align:right;color:#9f927d;font-size:13px">{{new Date(post.published_at || post.created_at).toLocaleDateString('zh-CN')}}</td>
+                  </tr>
+                  <tr v-if="editingId===post.id">
+                    <td colspan="6" style="padding:20px 16px;background:#faf8f2;border-top:2px solid #e8e0cc">
+                      <div class="editor-layout">
+                        <div class="editor-main" style="display:flex;flex-direction:column">
+                          <div class="form-group"><label>标题</label><input v-model="form.title"></div>
+                          <div class="form-group" style="flex:1;display:flex;flex-direction:column">
+                            <label>内容</label>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+                              <button type="button" @click="insertMd('heading')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#725d42">标题</button>
+                              <button type="button" @click="insertMd('bold')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700;color:#725d42">B</button>
+                              <button type="button" @click="insertMd('italic')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;font-style:italic;color:#725d42">I</button>
+                              <button type="button" @click="insertMd('link')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">🔗</button>
+                              <button type="button" @click="insertMd('image')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">🖼</button>
+                              <button type="button" @click="insertMd('code')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">代码</button>
+                              <button type="button" @click="insertMd('ul')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">•列表</button>
+                              <button type="button" @click="insertMd('ol')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">1.序号</button>
+                              <button type="button" @click="insertMd('quote')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">❝引用</button>
+                              <button type="button" @click="insertMd('hr')" style="padding:4px 10px;background:#f0e8d8;border:2px solid #c4b89e;border-radius:6px;cursor:pointer;font-size:12px;color:#725d42">—分割线</button>
+                            </div>
+                            <textarea v-model="form.content" style="flex:1;min-height:200px"></textarea>
+                          </div>
+                          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn" @click="savePost">保存</button><button class="btn btn-cancel" @click="editingId=null">取消</button></div>
+                        </div>
+                        <div class="editor-side">
+                          <div class="form-group"><label>状态</label>
+                            <div class="custom-select" @click.stop>
+                              <div class="custom-select-trigger" :class="{active: customSelects['status']}" @click="toggleSelect('status')">{{ form.status === 'draft' ? '草稿' : '已发布' }}</div>
+                              <div class="custom-select-dropdown" :class="{show: customSelects['status']}">
+                                <div class="custom-select-option" :class="{selected: form.status==='draft'}" @click="selectOption('status', 'draft', 'status')">草稿</div>
+                                <div class="custom-select-option" :class="{selected: form.status==='published'}" @click="selectOption('status', 'published', 'status')">已发布</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group"><label>日期</label><input type="date" v-model="form.published_at"></div>
+                          <div class="form-group"><label>分类</label>
+                            <div class="custom-select" @click.stop>
+                              <div class="custom-select-trigger" :class="{active: customSelects['category']}" @click="toggleSelect('category')">{{ form.category || '请选择' }}</div>
+                              <div class="custom-select-dropdown" :class="{show: customSelects['category']}">
+                                <div class="custom-select-option" @click="selectOption('category', '', 'category')">请选择</div>
+                                <div v-for="cat in categories" :key="cat.id" class="custom-select-option" :class="{selected: form.category===cat.name}" @click="selectOption('category', cat.name, 'category')">{{ cat.name }}</div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-group"><label>标签</label><input v-model="form.tags" placeholder="用英文逗号隔开"></div>
+                          <div class="form-group"><label>密码（可选）</label><input v-model="form.password" type="password" placeholder="留空无需密码"></div>
+                          <div class="form-group">
+                            <label>封面图片</label>
+                            <div class="cover-upload" @click="$refs.editFileInput.click()" @dragover.prevent @drop.prevent="handleDrop" style="padding:16px;border:2px dashed #c4b89e;border-radius:12px;background:#f0e8d8">
+                              <input ref="editFileInput" type="file" @change="handleCoverChange" accept="image/*" style="display:none">
+                              <div v-if="!coverPreview"><p style="color:#9f927d;font-size:13px">点击或拖拽上传</p></div>
+                              <img v-else :src="coverPreview" style="max-width:100%;border-radius:8px">
+                            </div>
+                            <div v-if="coverPreview" style="display:flex;gap:6px;margin-top:6px">
+                              <button @click="$refs.editFileInput.click()" style="flex:1;padding:8px 16px;background:#19c8b9;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #11a89b">更换</button>
+                              <button @click="deleteCover" style="flex:1;padding:8px 16px;background:#e05a5a;color:#fff;border:none;border-radius:50px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 3px 0 0 #c94444">删除</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
           </div>
         </div>
         <div v-if="currentPage==='new'">
