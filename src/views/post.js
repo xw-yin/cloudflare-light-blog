@@ -130,9 +130,9 @@ export function getPostHTML(post, settings) {
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
         </div>
-        <div style="font-size:0.78em;color:#9f927d;margin-bottom:14px;line-height:1.8">
-          <div>🕐 建站时间：${escapeHtml(settings.site_created_at || '2020-02-02')}</div>
-          <div>🔄 最后更新：<span id="site-updated">-</span></div>
+        <div style="font-size:0.88em;color:#9f927d;margin-bottom:14px;line-height:1.8">
+          <div>建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</div>
+          <div>最后更新：<span id="site-updated">-</span></div>
         </div>
         <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
@@ -146,7 +146,7 @@ export function getPostHTML(post, settings) {
         <h1>${escapeHtml(post.title)}</h1>
         <div class="post-meta">
           <span>${escapeHtml(post.category)}</span>
-          <span>${new Date(post.created_at).toLocaleDateString('zh-CN')}</span>
+          <span>${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at))}</span>
         </div>
         <div id="post-content" style="line-height:1.8"></div>
         ${post.tags ? `<div style="margin-top:24px;padding-top:16px;border-top:2px solid #e8e0cc;display:flex;flex-wrap:wrap;gap:8px">${post.tags.split(',').map(t =>
@@ -172,7 +172,7 @@ export function getPostHTML(post, settings) {
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
       document.getElementById('stat-tags').textContent = s.tagCount || 0;
-      if (s.latestDate) document.getElementById('site-updated').textContent = new Date(s.latestDate).toLocaleDateString('zh-CN');
+      if (s.latestDate) { var d = new Date(s.latestDate); document.getElementById('site-updated').textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'; }
     });
     fetch('/api/categories').then(function(r){return r.json()}).then(function(cats){
       var list = document.getElementById('category-list');

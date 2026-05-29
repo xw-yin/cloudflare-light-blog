@@ -42,7 +42,7 @@ export function getFrontendHTML(settings) {
     header p { opacity: 0.9; font-size: 1.1em; font-weight: 500; }
     main { max-width: 1124px; margin: 30px auto; padding: 0 20px; display: flex; gap: 24px; align-items: flex-start; }
     .sidebar { width: 280px; flex-shrink: 0; }
-    .post-list { flex: 1; display: flex; flex-direction: column; gap: 20px; }
+    .post-list { flex: 1; display: flex; flex-direction: column; gap: 28px; }
     .post-card { background: #f7f3df; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); display: flex; flex-direction: row; transition: all 0.3s ease; border: 2px solid #e8e0cc; }
     .post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(114, 93, 66, 0.15); }
     .post-card .post-cover { width: 220px; flex-shrink: 0; background: #e8e0cc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -90,7 +90,7 @@ export function getFrontendHTML(settings) {
       .profile-card { border-radius: 16px; padding: 16px; }
       .profile-card .avatar { width: 56px; height: 56px; }
       .profile-card .name { font-size: 1em; }
-      .post-list { width: 100%; gap: 16px; }
+      .post-list { width: 100%; gap: 20px; }
       .post-card { flex-direction: column; border-radius: 16px; }
       .post-card .post-cover { display: none; }
       .post-card .post-content { padding: 14px; }
@@ -118,9 +118,9 @@ export function getFrontendHTML(settings) {
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
         </div>
-        <div style="font-size:0.78em;color:#9f927d;margin-bottom:14px;line-height:1.8">
-          <div>🕐 建站时间：${escapeHtml(settings.site_created_at || '2020-02-02')}</div>
-          <div>🔄 最后更新：<span id="site-updated">-</span></div>
+        <div style="font-size:0.88em;color:#9f927d;margin-bottom:14px;line-height:1.8">
+          <div>建站时间：<span id="site-created">${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</span></div>
+          <div>最后更新：<span id="site-updated">-</span></div>
         </div>
         <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
@@ -159,7 +159,7 @@ export function getFrontendHTML(settings) {
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
       document.getElementById('stat-tags').textContent = s.tagCount || 0;
-      if (s.latestDate) document.getElementById('site-updated').textContent = new Date(s.latestDate).toLocaleDateString('zh-CN');
+      if (s.latestDate) { var d = new Date(s.latestDate); document.getElementById('site-updated').textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'; }
     });
     fetch('/api/categories').then(function(r){return r.json()}).then(function(cats){
       var list = document.getElementById('category-list');
@@ -219,7 +219,7 @@ export function getFrontendHTML(settings) {
               '<p style="color:#725d42;font-size:0.9em;line-height:1.7;margin:8px 0">' + excerpt + '</p>' +
               (tags ? '<div style="margin:8px 0 0">' + tags + '</div>' : '') +
               '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">' +
-                '<div class="meta"><span>📂 ' + post.category + '</span><span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span></div>' +
+                '<div class="meta"><span>📂 ' + post.category + '</span><span>' + (function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at)) + '</span></div>' +
                 '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '">阅读更多</a>' +
               '</div>' +
             '</div>' +
@@ -256,7 +256,7 @@ export function getFrontendHTML(settings) {
 
     loadPosts(currentPage);
 
-    // 搜索功能
+    // 搜索功能（标题 + 标签）
     var searchTimer;
     document.getElementById('search-input').addEventListener('input', function() {
       clearTimeout(searchTimer);
@@ -264,10 +264,14 @@ export function getFrontendHTML(settings) {
       searchTimer = setTimeout(function() {
         var cards = document.querySelectorAll('.post-card');
         cards.forEach(function(card) {
+          if (!keyword) { card.style.display = ''; return; }
           var title = card.querySelector('h2 a');
-          if (!title) return;
-          var text = title.textContent.toLowerCase();
-          card.style.display = (!keyword || text.indexOf(keyword) !== -1) ? '' : 'none';
+          var titleText = title ? title.textContent.toLowerCase() : '';
+          var tags = card.querySelectorAll('span[style*="background:#e6f5f0"]');
+          var tagText = '';
+          tags.forEach(function(t) { tagText += t.textContent.toLowerCase() + ' '; });
+          var match = titleText.indexOf(keyword) !== -1 || tagText.indexOf(keyword) !== -1;
+          card.style.display = match ? '' : 'none';
         });
       }, 200);
     });
