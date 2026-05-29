@@ -273,7 +273,7 @@ export function getPostHTML(post, settings) {
     blockquote p + p { margin-top: 8px; }
     details { background: #f5f2eb; border: 1.5px solid #ddd6c6; border-radius: 12px; padding: 0; margin: 16px 0; overflow: hidden; }
     summary { padding: 14px 20px; background: #ede8dc; cursor: pointer; font-weight: 700; color: #794f27; border-bottom: 1.5px solid #ddd6c6; list-style: none; display: flex; align-items: center; gap: 8px; }
-    summary::before { content: '\25B6'; font-size: 12px; transition: transform 0.2s; display: inline-block; }
+    summary::before { content: '\\25B6'; font-size: 12px; transition: transform 0.2s; display: inline-block; }
     details[open] summary::before { transform: rotate(90deg); }
     summary::-webkit-details-marker { display: none; }
     details > div, details > p { padding: 16px 20px; }
