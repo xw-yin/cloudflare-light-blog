@@ -268,7 +268,7 @@ export function getPostHTML(post, settings) {
     .hljs-link { color: #a5d6ff; text-decoration: underline; }
     .hljs-addition { color: #aff5b4; background: rgba(46,160,67,0.15); }
     blockquote { position: relative; background: #f0ece2; border-left: 4px solid #c4b89e; border-radius: 0 12px 12px 0; padding: 16px 20px 16px 48px; margin: 16px 0; color: #6b5d45; font-style: italic; line-height: 1.8; }
-    blockquote::before { content: '\201C'; position: absolute; left: 14px; top: 8px; font-size: 48px; color: #c4b89e; font-family: Georgia, serif; line-height: 1; font-style: normal; }
+    blockquote::before { content: '\\201C'; position: absolute; left: 14px; top: 8px; font-size: 48px; color: #c4b89e; font-family: Georgia, serif; line-height: 1; font-style: normal; }
     blockquote p { margin: 0; }
     blockquote p + p { margin-top: 8px; }
     details { background: #f5f2eb; border: 1.5px solid #ddd6c6; border-radius: 12px; padding: 0; margin: 16px 0; overflow: hidden; }
