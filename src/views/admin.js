@@ -237,10 +237,6 @@ export function getAdminHTML() {
       /* 自定义下拉 */
       .custom-select-dropdown { max-height: 200px; }
     }
-      .btn { padding: 10px 20px; font-size: 14px; }
-      .custom-select-dropdown { max-height: 150px; }
-    }
-  
     /* ========== 手机端宽度自适应 ========== */
     @media (max-width: 768px) {
       [style*="width:33.33%"],
