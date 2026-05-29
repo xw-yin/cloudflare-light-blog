@@ -128,6 +128,11 @@ export function getPostHTML(post, settings) {
         <div class="stats">
           <div class="stat-item"><div id="stat-posts" class="stat-num">-</div><div class="stat-label">文章</div></div>
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
+          <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
+        </div>
+        <div style="font-size:0.78em;color:#9f927d;margin-bottom:14px;line-height:1.8">
+          <div>🕐 建站时间：${escapeHtml(settings.site_created_at || '2020-02-02')}</div>
+          <div>🔄 最后更新：<span id="site-updated">-</span></div>
         </div>
         <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
@@ -166,6 +171,8 @@ export function getPostHTML(post, settings) {
     fetch('/api/stats').then(function(r){return r.json()}).then(function(s){
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
+      document.getElementById('stat-tags').textContent = s.tagCount || 0;
+      if (s.latestDate) document.getElementById('site-updated').textContent = new Date(s.latestDate).toLocaleDateString('zh-CN');
     });
     fetch('/api/categories').then(function(r){return r.json()}).then(function(cats){
       var list = document.getElementById('category-list');

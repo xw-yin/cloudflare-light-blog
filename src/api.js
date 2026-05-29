@@ -238,13 +238,26 @@ async function handleGetSettings(env) {
  * 获取统计信息
  */
 async function handleGetStats(env) {
-  const [postCount, catCount] = await Promise.all([
+  const [postCount, catCount, tagCount, latestPost] = await Promise.all([
     env.DB.prepare("SELECT COUNT(*) as cnt FROM posts WHERE status='published'").first(),
-    env.DB.prepare("SELECT COUNT(*) as cnt FROM categories").first()
+    env.DB.prepare("SELECT COUNT(*) as cnt FROM categories").first(),
+    env.DB.prepare("SELECT tags FROM posts WHERE status='published' AND tags IS NOT NULL AND tags != ''").all(),
+    env.DB.prepare("SELECT created_at FROM posts WHERE status='published' ORDER BY created_at DESC LIMIT 1").first()
   ]);
+
+  // 统计去重标签数
+  const tagSet = new Set();
+  if (tagCount.results) {
+    tagCount.results.forEach(r => {
+      if (r.tags) r.tags.split(',').forEach(t => { const s = t.trim(); if (s) tagSet.add(s); });
+    });
+  });
+
   const resp = json({
     postCount: postCount?.cnt ?? 0,
-    catCount: catCount?.cnt ?? 0
+    catCount: catCount?.cnt ?? 0,
+    tagCount: tagSet.size,
+    latestDate: latestPost?.created_at || ''
   });
   resp.headers.set('Cache-Control', 'public, max-age=60');
   return resp;

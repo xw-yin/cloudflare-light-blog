@@ -116,6 +116,11 @@ export function getFrontendHTML(settings) {
         <div class="stats">
           <div class="stat-item"><div id="stat-posts" class="stat-num">-</div><div class="stat-label">文章</div></div>
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
+          <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
+        </div>
+        <div style="font-size:0.78em;color:#9f927d;margin-bottom:14px;line-height:1.8">
+          <div>🕐 建站时间：${escapeHtml(settings.site_created_at || '2020-02-02')}</div>
+          <div>🔄 最后更新：<span id="site-updated">-</span></div>
         </div>
         <h4>📂 分类</h4>
         <div id="category-list" class="category-list"></div>
@@ -123,8 +128,13 @@ export function getFrontendHTML(settings) {
         <div id="link-list" class="link-list"></div>
       </div>
     </aside>
-    <div class="post-list" id="app">
-      <p style="text-align:center;color:#9f927d;">加载中...</p>
+    <div class="post-list">
+      <div style="margin-bottom:16px">
+        <input id="search-input" type="text" placeholder="搜索文章标题..." style="width:100%;padding:12px 18px;border:2px solid #e8e0cc;border-radius:14px;font-size:15px;background:#f7f3df;color:#725d42;outline:none;transition:border-color 0.2s;box-shadow:0 2px 8px rgba(107,92,67,0.08)" onfocus="this.style.borderColor='#19c8b9'" onblur="this.style.borderColor='#e8e0cc'">
+      </div>
+      <div id="app">
+        <p style="text-align:center;color:#9f927d;">加载中...</p>
+      </div>
     </div>
   </main>
   <button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
@@ -148,6 +158,8 @@ export function getFrontendHTML(settings) {
     fetch('/api/stats').then(function(r){return r.json()}).then(function(s){
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
+      document.getElementById('stat-tags').textContent = s.tagCount || 0;
+      if (s.latestDate) document.getElementById('site-updated').textContent = new Date(s.latestDate).toLocaleDateString('zh-CN');
     });
     fetch('/api/categories').then(function(r){return r.json()}).then(function(cats){
       var list = document.getElementById('category-list');
@@ -205,9 +217,9 @@ export function getFrontendHTML(settings) {
             '<div class="post-content">' +
               '<h2><a href="/post/' + formatDate(post.created_at) + '/' + post.id + '">' + post.title + '</a></h2>' +
               '<p style="color:#725d42;font-size:0.9em;line-height:1.7;margin:8px 0">' + excerpt + '</p>' +
-              (tags ? '<div style="margin:12px 0 4px">' + tags + '</div>' : '') +
-              '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">' +
-                '<div class="meta"><span>' + post.category + '</span><span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span></div>' +
+              (tags ? '<div style="margin:8px 0 0">' + tags + '</div>' : '') +
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">' +
+                '<div class="meta"><span>📂 ' + post.category + '</span><span>' + new Date(post.created_at).toLocaleDateString('zh-CN') + '</span></div>' +
                 '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '">阅读更多</a>' +
               '</div>' +
             '</div>' +
@@ -243,6 +255,22 @@ export function getFrontendHTML(settings) {
     }
 
     loadPosts(currentPage);
+
+    // 搜索功能
+    var searchTimer;
+    document.getElementById('search-input').addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      var keyword = this.value.trim().toLowerCase();
+      searchTimer = setTimeout(function() {
+        var cards = document.querySelectorAll('.post-card');
+        cards.forEach(function(card) {
+          var title = card.querySelector('h2 a');
+          if (!title) return;
+          var text = title.textContent.toLowerCase();
+          card.style.display = (!keyword || text.indexOf(keyword) !== -1) ? '' : 'none';
+        });
+      }, 200);
+    });
   </script>
 </body>
 </html>`;
