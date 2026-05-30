@@ -142,10 +142,10 @@ export async function handleAPI(request, env, path) {
           return resp;
         }
         // 记录失败尝试
-        try {
         await recordRateAttempt(env, rateKey, RATE_WINDOW_1H);
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
+        console.error(e.message || 'Error');
         return json({ success: false, error: '认证失败' }, 500);
       }
     }
