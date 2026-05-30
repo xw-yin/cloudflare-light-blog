@@ -139,8 +139,9 @@ git push -u origin main
 | 变量名 | 类型 | 说明 |
 |--------|------|------|
 | `ADMIN_PASSWORD` | **Secret** | 管理员密码 |
+| `DB_ID` | **Secret** | D1 数据库 ID |
 
-> ⚠️ `ADMIN_PASSWORD` 请使用 **Secret** 类型，确保密码加密存储。
+> ⚠️ `ADMIN_PASSWORD` 和 `DB_ID` 请使用 **Secret** 类型，确保敏感信息安全。
 > CORS 来源、全站密码等配置在后台网站设置中管理，无需在此设置。
 
 ### 7. 后续更新

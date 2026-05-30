@@ -3,7 +3,7 @@
 
 import { html, errorResponse, handleOptions, getCorsHeaders } from './lib/utils.js';
 import { initDB, getSettings } from './lib/db.js';
-import { authenticateRequest } from './lib/auth.js';
+import { authenticateRequest, verifyPasswordHash } from './lib/auth.js';
 import { handleImage } from './lib/image.js';
 import { withCache } from './lib/cache.js';
 import { handleAPI } from './api.js';
@@ -99,7 +99,7 @@ export default {
       return handleFrontendPage(request, env, ctx);
 
     } catch (e) {
-      console.error('[Worker] 未捕获错误:', e);
+      console.error('[Worker] 未捕获错误:', e.message || 'Error');
       return errorResponse('服务器错误', 500, e);
     }
   }
@@ -315,9 +315,9 @@ async function renderPostPage(env, id, providedPassword) {
     if (authMatch) {
       authenticated = await verifyPostAuth(authMatch[1], post.password, id);
     }
-    // 兼容 URL 参数（旧方式）
-    if (providedPassword === post.password) {
-      authenticated = true;
+    // 兼容 URL 参数（旧方式，使用哈希比较）
+    if (providedPassword) {
+      authenticated = await verifyPasswordHash(providedPassword, post.password);
     }
     if (!authenticated) {
       return html(getPasswordHTML(post));

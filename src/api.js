@@ -1,9 +1,78 @@
 // ==================== API 处理模块（分页 + 错误处理）====================
 
 import { json, errorResponse, generateSlug, getCorsHeaders } from './lib/utils.js';
-import { generateToken, verifyToken, authenticateRequest } from './lib/auth.js';
+import { generateToken, verifyToken, authenticateRequest, hashPassword, verifyPasswordHash } from './lib/auth.js';
 import { initDB, getSettings, saveSettings } from './lib/db.js';
 import { handleUpload } from './lib/image.js';
+
+// ==================== 常量 ====================
+const RATE_MAX_5 = 5;                    // 最大尝试次数
+const RATE_WINDOW_10M = 10 * 60 * 1000;  // 10分钟窗口
+const RATE_WINDOW_1H = 60 * 60 * 1000;   // 1小时窗口
+const COOKIE_MAX_AGE = 86400;            // Cookie 有效期 24小时（秒）
+
+// ==================== 公共函数 ====================
+
+/**
+ * 速率限制检查
+ * @returns {boolean} true=允许, false=超限
+ */
+async function checkRateLimit(env, key, maxAttempts, windowMs) {
+  try {
+    const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(key).first();
+    if (row) {
+      const attempts = JSON.parse(row.value);
+      const recent = attempts.filter(t => Date.now() - t < windowMs);
+      if (recent.length >= maxAttempts) return false;
+    }
+  } catch (e) { console.error('[RateLimit]', e.message || 'Error'); }
+  return true;
+}
+
+/**
+ * 记录速率限制失败尝试
+ */
+async function recordRateAttempt(env, key, windowMs) {
+  try {
+    const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(key).first();
+    let attempts = [];
+    if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
+    attempts.push(Date.now());
+    attempts = attempts.filter(t => Date.now() - t < windowMs);
+    await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(key, JSON.stringify(attempts)).run();
+  } catch (e) { console.error('[RateLimit]', e.message || 'Error'); }
+}
+
+/**
+ * 清除速率限制记录
+ */
+async function clearRateLimit(env, key) {
+  try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(key).run(); } catch (e) {}
+}
+
+/**
+ * 生成站点认证 Cookie
+ */
+async function generateSiteAuthCookie(password) {
+  const timestamp = Date.now();
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', encoder.encode(password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('site_auth:' + timestamp));
+  const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return timestamp + '.' + sigHex;
+}
+
+/**
+ * 生成文章认证 Cookie
+ */
+async function generatePostAuthCookie(postId, password) {
+  const timestamp = Date.now();
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('post_auth:' + timestamp));
+  const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return timestamp + '.' + sigHex;
+}
 
 /**
  * 处理所有 API 请求
@@ -25,42 +94,24 @@ export async function handleAPI(request, env, path) {
         const body = await request.json();
         const { postId, password } = body;
         if (!postId || !password) return json({ success: false, error: '参数错误' }, 400);
+        if (!Number.isFinite(Number(postId))) return json({ success: false, error: '参数错误' }, 400);
 
         const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
         const rateKey = 'post_auth_rate_' + clientIP + '_' + postId;
-        try {
-          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
-          if (row) {
-            const attempts = JSON.parse(row.value);
-            const recent = attempts.filter(t => Date.now() - t < 3600000);
-            if (recent.length >= 5) {
-              return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
-            }
-          }
-        } catch (e) { console.error(e); }
+        if (!await checkRateLimit(env, rateKey, RATE_MAX_5, RATE_WINDOW_1H)) {
+          return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
+        }
 
         const post = await env.DB.prepare("SELECT password FROM posts WHERE id=? AND status='published'").bind(postId).first();
         if (!post) return json({ success: false, error: '文章不存在' }, 404);
-        if (post.password === password) {
-          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) { console.error(e); }
-          const timestamp = Date.now();
-          const encoder = new TextEncoder();
-          const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-          const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('post_auth:' + timestamp));
-          const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-          const cookieValue = timestamp + '.' + sigHex;
+        if (await verifyPasswordHash(password, post.password)) {
+          await clearRateLimit(env, rateKey);
+          const cookieValue = await generatePostAuthCookie(postId, password);
           const resp = json({ success: true });
-          resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400');
+          resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
           return resp;
         }
-        try {
-          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
-          let attempts = [];
-          if (row) { try { attempts = JSON.parse(row.value); } catch (e) { console.error(e); } }
-          attempts.push(Date.now());
-          attempts = attempts.filter(t => Date.now() - t < 3600000);
-          await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
-        } catch (e) { console.error(e); }
+        await recordRateAttempt(env, rateKey, RATE_WINDOW_1H);
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
         return json({ success: false, error: '认证失败' }, 500);
@@ -76,42 +127,23 @@ export async function handleAPI(request, env, path) {
           return json({ success: true, message: '未设置全站密码' });
         }
 
-        // 速率限制检查
+        // 速率限制检查（5次/1小时）
         const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
         const rateKey = 'site_auth_rate_' + clientIP;
-        try {
-          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
-          if (row) {
-            const attempts = JSON.parse(row.value);
-            const recent = attempts.filter(t => Date.now() - t < 3600000);
-            if (recent.length >= 5) {
-              return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
-            }
-          }
-        } catch (e) { console.error(e); }
+        if (!await checkRateLimit(env, rateKey, RATE_MAX_5, RATE_WINDOW_1H)) {
+          return json({ success: false, error: '密码错误次数过多，请 1 小时后再试' }, 429);
+        }
 
         if (body.password === settings.site_password) {
-          // 成功，清除限制
-          try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) { console.error(e); }
-          const timestamp = Date.now();
-          const encoder = new TextEncoder();
-          const key = await crypto.subtle.importKey('raw', encoder.encode(settings.site_password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-          const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('site_auth:' + timestamp));
-          const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
-          const cookieValue = timestamp + '.' + sigHex;
+          await clearRateLimit(env, rateKey);
+          const cookieValue = await generateSiteAuthCookie(settings.site_password);
           const resp = json({ success: true });
-          resp.headers.set('Set-Cookie', 'site_auth=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=86400');
+          resp.headers.set('Set-Cookie', 'site_auth=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
           return resp;
         }
         // 记录失败尝试
         try {
-          const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
-          let attempts = [];
-          if (row) { try { attempts = JSON.parse(row.value); } catch (e) { console.error(e); } }
-          attempts.push(Date.now());
-          attempts = attempts.filter(t => Date.now() - t < 3600000);
-          await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
-        } catch (e) { console.error(e); }
+        await recordRateAttempt(env, rateKey, RATE_WINDOW_1H);
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
         return json({ success: false, error: '认证失败' }, 500);
@@ -125,35 +157,21 @@ export async function handleAPI(request, env, path) {
         return json({ success: true, token: 'no-auth' });
       }
 
-      // 速率限制：5次/10分钟
+      // 速率限制（5次/10分钟）
       const clientIP = request.headers.get('CF-Connecting-IP') || 'unknown';
       const rateKey = 'login_rate_' + clientIP;
-      try {
-        const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
-        if (row) {
-          const data = JSON.parse(row.value);
-          const recent = data.filter(t => Date.now() - t < 600000);
-          if (recent.length >= 5) {
-            return json({ success: false, error: '登录尝试次数过多，请 10 分钟后再试' }, 429);
-          }
-        }
-      } catch (e) { console.error(e); }
+      if (!await checkRateLimit(env, rateKey, RATE_MAX_5, RATE_WINDOW_10M)) {
+        return json({ success: false, error: '登录尝试次数过多，请 10 分钟后再试' }, 429);
+      }
 
       if (body.password === env.ADMIN_PASSWORD) {
-        try { await env.DB.prepare("DELETE FROM settings WHERE key=?").bind(rateKey).run(); } catch (e) { console.error(e); }
+        await clearRateLimit(env, rateKey);
         const token = await generateToken(env.ADMIN_PASSWORD);
         return json({ success: true, token });
       }
 
-      // 记录失败尝试
-      try {
-        const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(rateKey).first();
-        let attempts = [];
-        if (row) { try { attempts = JSON.parse(row.value); } catch (e) { console.error(e); } }
-        attempts.push(Date.now());
-        attempts = attempts.filter(t => Date.now() - t < 600000);
-        await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(rateKey, JSON.stringify(attempts)).run();
-      } catch (e) { console.error(e); }
+      await recordRateAttempt(env, rateKey, RATE_WINDOW_10M);
+      } catch (e) { console.error(e.message || 'Error'); }
 
       return json({ success: false, error: '密码错误' }, 401);
     }
@@ -470,7 +488,7 @@ async function handleCreatePost(request, env) {
     body.category || '未分类',
     body.tags || '',
     body.status || 'draft',
-    body.password || '',
+    body.password ? await hashPassword(body.password) : '',
     now,
     now,
     published_at
@@ -505,7 +523,7 @@ async function handleUpdatePost(request, env) {
     body.category || '未分类',
     body.tags || '',
     body.status || 'draft',
-    body.password || '',
+    body.password ? await hashPassword(body.password) : '',
     now,
     published_at,
     id

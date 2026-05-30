@@ -1,18 +1,73 @@
-// ==================== 认证模块（HMAC + 过期时间）====================
+// ==================== 认证模块（HMAC + HKDF + 恒定时间比较）====================
 
 const TOKEN_EXPIRY = 48 * 60 * 60 * 1000; // 48小时过期
+const HKDF_SALT = 'cloudflare-light-blog-auth-v1'; // HKDF 固定 salt
 
 /**
- * 获取 HMAC 密钥
+ * 恒定时间比较（防止时序攻击）
  */
-async function getHMACKey(secret) {
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  const ua = new Uint8Array(a);
+  const ub = new Uint8Array(b);
+  let diff = 0;
+  for (let i = 0; i < ua.length; i++) {
+    diff |= ua[i] ^ ub[i];
+  }
+  return diff === 0;
+}
+
+/**
+ * 使用 HKDF 从密码派生 32 字节密钥
+ */
+async function deriveKey(password) {
   const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(password),
+    'HKDF',
+    false,
+    ['deriveBits']
+  );
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: 'HKDF',
+      hash: 'SHA-256',
+      salt: encoder.encode(HKDF_SALT),
+      info: encoder.encode('hmac-key')
+    },
+    keyMaterial,
+    256
+  );
   return crypto.subtle.importKey(
     'raw',
-    encoder.encode(secret),
+    derivedBits,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign', 'verify']
+  );
+}
+
+/**
+ * 哈希密码（用于存储，HMAC-SHA256 + 固定 salt）
+ */
+export async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const key = await deriveKey('password-salt-' + HKDF_SALT);
+  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(password));
+  return Array.from(new Uint8Array(sig))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/**
+ * 验证密码哈希
+ */
+export async function verifyPasswordHash(password, hash) {
+  const computed = await hashPassword(password);
+  return timingSafeEqual(
+    new Uint8Array(computed.match(/.{2}/g).map(b => parseInt(b, 16))),
+    new Uint8Array(hash.match(/.{2}/g).map(b => parseInt(b, 16)))
   );
 }
 
@@ -22,7 +77,7 @@ async function getHMACKey(secret) {
  */
 export async function generateToken(password) {
   const timestamp = Date.now();
-  const key = await getHMACKey(password);
+  const key = await deriveKey(password);
   const encoder = new TextEncoder();
   const data = encoder.encode(`auth:${timestamp}`);
   const signature = await crypto.subtle.sign('HMAC', key, data);
@@ -33,7 +88,7 @@ export async function generateToken(password) {
 }
 
 /**
- * 验证认证令牌
+ * 验证认证令牌（恒定时间比较）
  */
 export async function verifyToken(token, password) {
   if (!token || !password) return false;
@@ -44,23 +99,24 @@ export async function verifyToken(token, password) {
   const [timestampStr, sigHex] = parts;
   const timestamp = parseInt(timestampStr, 10);
 
-  // 检查时间戳是否有效
   if (isNaN(timestamp)) return false;
-
-  // 检查是否过期
   if (Date.now() - timestamp > TOKEN_EXPIRY) return false;
 
-  // 验证签名
   try {
-    const key = await getHMACKey(password);
+    const key = await deriveKey(password);
     const encoder = new TextEncoder();
     const data = encoder.encode(`auth:${timestamp}`);
     const expectedSig = await crypto.subtle.sign('HMAC', key, data);
     const expectedHex = Array.from(new Uint8Array(expectedSig))
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
-    return sigHex === expectedHex;
-  } catch {
+    // 恒定时间比较
+    return timingSafeEqual(
+      new Uint8Array(sigHex.match(/.{2}/g).map(b => parseInt(b, 16))),
+      new Uint8Array(expectedHex.match(/.{2}/g).map(b => parseInt(b, 16)))
+    );
+  } catch (e) {
+    console.error('[Auth]', e.message || 'Error');
     return false;
   }
 }
@@ -69,27 +125,13 @@ export async function verifyToken(token, password) {
  * 从请求中提取并验证 token
  */
 export async function authenticateRequest(request, env) {
-  // 未设置密码则跳过认证
   if (!env.ADMIN_PASSWORD) return true;
 
   const authHeader = request.headers.get('Authorization');
   if (!authHeader) return false;
 
   const token = authHeader.replace('Bearer ', '');
-  const valid = await verifyToken(token, env.ADMIN_PASSWORD);
-  if (!valid) return false;
-
-  // 检查 token 版本（密码修改/注销后旧 token 失效）
-  if (env.DB) {
-    try {
-      const row = await env.DB.prepare("SELECT value FROM settings WHERE key='token_version'").first();
-      const serverVersion = row ? parseInt(row.value) || 0 : 0;
-      // 从 token 中提取版本号（嵌入在签名中）
-      // 简化方案：token 过期即失效，手动注销通过前端清除实现
-    } catch (e) { console.error("[Auth]", e); }
-  }
-
-  return true;
+  return verifyToken(token, env.ADMIN_PASSWORD);
 }
 
 /**

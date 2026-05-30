@@ -11,12 +11,30 @@ export function json(data, status = 200) {
 }
 
 /**
- * HTML 响应
+ * CSP 头（适度宽松，允许 CDN 和内联脚本/样式）
+ */
+export const CSP_HEADER = "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self';";
+
+/**
+ * HTTP 安全头
+ */
+export const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Referrer-Policy': 'strict-origin-when-cross-origin'
+};
+
+/**
+ * HTML 响应（带 CSP + 安全头）
  */
 export function html(content, status = 200) {
   return new Response(content, {
     status,
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Security-Policy': CSP_HEADER,
+      ...SECURITY_HEADERS
+    }
   });
 }
 

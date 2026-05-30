@@ -1,9 +1,11 @@
 // ==================== 数据库模块（优化初始化）====================
 
 /**
- * 获取表的列信息
+ * 获取表的列信息（白名单验证防止 SQL 注入）
  */
+const ALLOWED_TABLES = ['posts', 'categories', 'settings'];
 async function getTableColumns(DB, tableName) {
+  if (!ALLOWED_TABLES.includes(tableName)) return [];
   try {
     const { results } = await DB.prepare(
       `PRAGMA table_info(${tableName})`
@@ -152,7 +154,7 @@ export async function initDB(env) {
     console.log('[DB] 数据库初始化完成');
     return true;
   } catch (e) {
-    console.error('[DB] 初始化错误:', e);
+    console.error('[DB] 初始化错误:', e.message || 'Error');
     return false;
   }
 }
