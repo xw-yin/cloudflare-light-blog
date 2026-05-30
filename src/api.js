@@ -171,8 +171,6 @@ export async function handleAPI(request, env, path) {
       }
 
       await recordRateAttempt(env, rateKey, RATE_WINDOW_10M);
-      } catch (e) { console.error(e.message || 'Error'); }
-
       return json({ success: false, error: '密码错误' }, 401);
     }
 
