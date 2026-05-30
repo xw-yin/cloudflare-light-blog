@@ -132,7 +132,7 @@ export function getFrontendHTML(settings) {
     </aside>
     <div class="post-list">
       <div style="margin-bottom:16px">
-        <input id="search-input" type="text" placeholder="搜索文章标题..." style="width:100%;padding:12px 18px;border:2px solid #e8e0cc;border-radius:14px;font-size:15px;background:#f7f3df;color:#725d42;outline:none;transition:border-color 0.2s;box-shadow:0 2px 8px rgba(107,92,67,0.08)" onfocus="this.style.borderColor='#19c8b9'" onblur="this.style.borderColor='#e8e0cc'">
+        <input id="search-input" type="text" placeholder="搜索文章标题或标签……" style="width:100%;padding:12px 18px;border:2px solid #e8e0cc;border-radius:14px;font-size:15px;background:#f7f3df;color:#725d42;outline:none;transition:border-color 0.2s;box-shadow:0 2px 8px rgba(107,92,67,0.08)" onfocus="this.style.borderColor='#19c8b9'" onblur="this.style.borderColor='#e8e0cc'">
       </div>
       <div id="app">
         <p style="text-align:center;color:#9f927d;">加载中...</p>

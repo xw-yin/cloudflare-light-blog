@@ -114,9 +114,10 @@ export function getAdminHTML() {
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(107,92,67,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: #f7f3df; border-radius: 20px; padding: 32px; max-width: 400px; width: 90%; border: 2px solid #e8e0cc; }
     .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #6fba2c; color: #fff; border-radius: 50px; font-weight: 600; }
-    .w-33 { width: 33.33%; }
-    .w-50 { width: 50%; }
-    .w-66 { width: 66.66%; }
+    .w-33 { width: 33.33%; min-width: 300px; }
+    .w-50 { width: 50%; min-width: 400px; }
+    .w-60 { width: 60%; min-width: 500px; }
+    .main-content { min-width: 0; }
     /* ========== 平板端 (768px - 1024px) ========== */
     @media (min-width: 769px) and (max-width: 1024px) {
       .admin-layout { flex-direction: column; }
@@ -242,7 +243,7 @@ export function getAdminHTML() {
       .cover-upload { min-height: 60px; }
       /* 自定义下拉 */
       .custom-select-dropdown { max-height: 200px; }
-      .w-33, .w-50, .w-66 { width: 100% !important; }
+      .w-33, .w-50, .w-60 { width: 100% !important; }
     }
 
 </style>
@@ -262,9 +263,9 @@ export function getAdminHTML() {
         <div class="sidebar-menu" role="menubar">
           <a href="#" role="menuitem" :class="{active:currentPage==='posts'}" @click.prevent="currentPage='posts'" aria-label="文章管理">📝 文章管理</a>
           <a href="#" role="menuitem" :class="{active:currentPage==='category'}" @click.prevent="currentPage='category'" aria-label="分类管理">📂 分类管理</a>
-          <a href="#" role="menuitem" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'" aria-label="回收站">🗑️ 回收站</a>
-          <a href="#" role="menuitem" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'" aria-label="网站设置">⚙️ 网站设置</a>
           <a href="#" role="menuitem" :class="{active:currentPage==='profile'}" @click.prevent="currentPage='profile'" aria-label="个人设置">👤 个人设置</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'" aria-label="网站设置">⚙️ 网站设置</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'" aria-label="回收站">🗑️ 回收站</a>
         </div>
         <div class="sidebar-footer"><button @click="logout">退出登录</button></div>
       </nav>
@@ -272,7 +273,7 @@ export function getAdminHTML() {
         <div v-if="currentPage==='posts'">
           <div class="page-header"><h2>文章管理</h2></div>
           <button class="btn" @click="openAdd()" style="margin-bottom:16px">新建文章</button>
-          <div class="w-66"><div class="card" style="padding:0;overflow:hidden">
+          <div class="w-60"><div class="card" style="padding:0;overflow:hidden">
             <table style="width:100%;border-collapse:collapse">
               <thead>
                 <tr style="background:#f0e8d8">
@@ -601,13 +602,13 @@ export function getAdminHTML() {
         const saveSettings = async () => { try { const r = await api('/api/settings', { method: 'POST', data: settingsForm.value }); if (r.data && r.data.success) { showToast('保存成功'); } else { alert('保存失败: ' + (r.data ? r.data.error : '未知错误')); } } catch (e) { console.error('保存设置错误:', e); alert('保存失败: ' + (e.response ? e.response.data.error || e.response.statusText : e.message)); } };
         const handleCoverChange = async (e) => { const f = e.target.files[0]; if (f) await uploadFile(f); };
         const handleDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
-        const uploadFile = async (f) => { if (f.size > 1048576) { alert('文件大小不能超过 1MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) { form.value.cover_image = d.url; coverPreview.value = d.url; } };
+        const uploadFile = async (f) => { if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) { form.value.cover_image = d.url; coverPreview.value = d.url; } };
         const handleAvatarDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; } };
         const deleteCover = () => { form.value.cover_image = ''; coverPreview.value = ''; };
         const handleFavicon = async (e) => { const f = e.target.files[0]; if (f) await uploadFavicon(f); };
         const handleFaviconDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) await uploadFavicon(f); };
-        const uploadFavicon = async (f) => { if (f.size > 1048576) { alert('文件大小不能超过 1MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_favicon = d.url; };
-        const handleAvatar = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 1048576) { alert('文件大小不能超过 1MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; };
+        const uploadFavicon = async (f) => { if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_favicon = d.url; };
+        const handleAvatar = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; };
         const restorePost = async (id) => { const c = await showConfirm('确认恢复', '将文章恢复为草稿？'); if (!c) return; try { await api('/api/admin/restore', { method: 'POST', data: { id } }); loadPosts(); loadTrash(); showToast('已恢复'); } catch (e) { showToast('恢复失败'); } };
         const permanentDelete = async (id) => { const c = await showConfirm('确认删除', '彻底删除？不可恢复！'); if (!c) return; try { await api('/api/admin/permanent-delete', { method: 'POST', data: { id } }); loadTrash(); showToast('已删除'); } catch (e) { showToast('删除失败'); } };
 
