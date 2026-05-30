@@ -114,9 +114,9 @@ export function getAdminHTML() {
     .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(107,92,67,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: #f7f3df; border-radius: 20px; padding: 32px; max-width: 400px; width: 90%; border: 2px solid #e8e0cc; }
     .toast { position: fixed; bottom: 20px; right: 20px; padding: 16px 24px; background: #6fba2c; color: #fff; border-radius: 50px; font-weight: 600; }
-    .w-33 { width: 600px; }
-    .w-50 { width: 700px; }
-    .w-60 { width: 1000px; }
+    .w-33 { width: 720px; }
+    .w-50 { width: 820px; }
+    .w-60 { width: 1200px; }
     .main-content { min-width: 0; max-width: 100%; overflow-x: auto; }
     /* ========== 平板端 (768px - 1024px) ========== */
     @media (min-width: 769px) and (max-width: 1024px) {
