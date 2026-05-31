@@ -8,8 +8,9 @@ import { generateRandomFilename } from './utils.js';
 export async function handleImage(request, env, path) {
   const filename = path.replace('/images/', '');
 
-  // 验证文件名（防止路径遍历）
-  if (!filename || filename.includes('..') || filename.includes('/')) {
+  // 验证文件名（防止路径遍历 + 非法字符）
+  const SAFE_FILENAME = /^[a-zA-Z0-9_-]{1,64}\.(jpg|jpeg|png|gif|webp|svg|ico)$/;
+  if (!filename || !SAFE_FILENAME.test(filename)) {
     return new Response('Bad Request', { status: 400 });
   }
 

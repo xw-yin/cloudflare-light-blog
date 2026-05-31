@@ -10,7 +10,7 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "blog-db"
 database_id = "a55bc271-25cb-4a47-a4aa-5dca0d176933"
-# database_id = "${DB_ID}"
+#database_id = "${DB_ID}"
 
 # ============================================
 # R2 存储绑定

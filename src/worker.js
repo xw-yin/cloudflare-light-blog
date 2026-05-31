@@ -118,6 +118,19 @@ async function handleFrontendPage(request, env, ctx) {
 }
 
 /**
+ * 使用 HKDF 派生 HMAC 密钥（与 api.js 保持一致）
+ */
+async function deriveHMACKey(password, info) {
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'HKDF', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: encoder.encode('cloudflare-light-blog-cookie-v1'), info: encoder.encode(info) },
+    keyMaterial, 256
+  );
+  return crypto.subtle.importKey('raw', derivedBits, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+}
+
+/**
  * 验证文章密码 cookie
  */
 async function verifyPostAuth(cookieValue, password, postId) {
@@ -127,9 +140,8 @@ async function verifyPostAuth(cookieValue, password, postId) {
     const timestamp = parseInt(parts[0]);
     if (isNaN(timestamp)) return false;
     if (Date.now() - timestamp > 86400000) return false;
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('post_auth:' + timestamp));
+    const key = await deriveHMACKey(password, 'post-auth-' + postId);
+    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('post_auth:' + timestamp));
     const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
     return parts[1] === expected;
   } catch { return false; }
@@ -144,12 +156,9 @@ async function verifySiteAuth(cookieValue, password) {
     if (parts.length !== 2) return false;
     const timestamp = parseInt(parts[0]);
     if (isNaN(timestamp)) return false;
-    // 24小时过期
     if (Date.now() - timestamp > 86400000) return false;
-    // 验证签名
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey('raw', encoder.encode(password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('site_auth:' + timestamp));
+    const key = await deriveHMACKey(password, 'site-auth');
+    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('site_auth:' + timestamp));
     const expected = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
     return parts[1] === expected;
   } catch { return false; }

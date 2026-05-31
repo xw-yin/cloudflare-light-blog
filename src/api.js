@@ -14,33 +14,23 @@ const COOKIE_MAX_AGE = 86400;            // Cookie 有效期 24小时（秒）
 // ==================== 公共函数 ====================
 
 /**
- * 速率限制检查
+ * 速率限制：检查并记录（合并为单次操作减少竞态窗口）
  * @returns {boolean} true=允许, false=超限
  */
 async function checkRateLimit(env, key, maxAttempts, windowMs) {
   try {
-    const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(key).first();
-    if (row) {
-      const attempts = JSON.parse(row.value);
-      const recent = attempts.filter(t => Date.now() - t < windowMs);
-      if (recent.length >= maxAttempts) return false;
-    }
-  } catch (e) { console.error('[RateLimit]', e.message || 'Error'); }
-  return true;
-}
-
-/**
- * 记录速率限制失败尝试
- */
-async function recordRateAttempt(env, key, windowMs) {
-  try {
+    const now = Date.now();
     const row = await env.DB.prepare("SELECT value FROM settings WHERE key=?").bind(key).first();
     let attempts = [];
     if (row) { try { attempts = JSON.parse(row.value); } catch (e) {} }
-    attempts.push(Date.now());
-    attempts = attempts.filter(t => Date.now() - t < windowMs);
+    // 清理过期记录
+    attempts = attempts.filter(t => now - t < windowMs);
+    if (attempts.length >= maxAttempts) return false;
+    // 记录本次尝试
+    attempts.push(now);
     await env.DB.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)").bind(key, JSON.stringify(attempts)).run();
-  } catch (e) { console.error('[RateLimit]', e.message || 'Error'); }
+    return true;
+  } catch (e) { console.error('[RateLimit]', e.message || 'Error'); return true; }
 }
 
 /**
@@ -51,13 +41,25 @@ async function clearRateLimit(env, key) {
 }
 
 /**
+ * 使用 HKDF 派生 HMAC 密钥（不直接使用密码原文）
+ */
+async function deriveHMACKey(password, info) {
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'HKDF', false, ['deriveBits']);
+  const derivedBits = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: encoder.encode('cloudflare-light-blog-cookie-v1'), info: encoder.encode(info) },
+    keyMaterial, 256
+  );
+  return crypto.subtle.importKey('raw', derivedBits, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+}
+
+/**
  * 生成站点认证 Cookie
  */
 async function generateSiteAuthCookie(password) {
   const timestamp = Date.now();
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey('raw', encoder.encode(password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('site_auth:' + timestamp));
+  const key = await deriveHMACKey(password, 'site-auth');
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('site_auth:' + timestamp));
   const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
   return timestamp + '.' + sigHex;
 }
@@ -67,9 +69,8 @@ async function generateSiteAuthCookie(password) {
  */
 async function generatePostAuthCookie(postId, password) {
   const timestamp = Date.now();
-  const encoder = new TextEncoder();
-  const key = await crypto.subtle.importKey('raw', encoder.encode('post_' + postId + '_' + password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('HMAC', key, encoder.encode('post_auth:' + timestamp));
+  const key = await deriveHMACKey(password, 'post-auth-' + postId);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('post_auth:' + timestamp));
   const sigHex = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
   return timestamp + '.' + sigHex;
 }
@@ -111,7 +112,6 @@ export async function handleAPI(request, env, path) {
           resp.headers.set('Set-Cookie', 'post_auth_' + postId + '=' + cookieValue + '; Path=/; HttpOnly; SameSite=Lax; Max-Age=' + COOKIE_MAX_AGE);
           return resp;
         }
-        await recordRateAttempt(env, rateKey, RATE_WINDOW_1H);
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
         return json({ success: false, error: '认证失败' }, 500);
@@ -142,10 +142,9 @@ export async function handleAPI(request, env, path) {
           return resp;
         }
         // 记录失败尝试
-        await recordRateAttempt(env, rateKey, RATE_WINDOW_1H);
         return json({ success: false, error: '密码错误' }, 401);
       } catch (e) {
-        console.error(e.message || 'Error');
+        console.error((e.message || 'Error').substring(0, 100));
         return json({ success: false, error: '认证失败' }, 500);
       }
     }
@@ -170,7 +169,6 @@ export async function handleAPI(request, env, path) {
         return json({ success: true, token });
       }
 
-      await recordRateAttempt(env, rateKey, RATE_WINDOW_10M);
       return json({ success: false, error: '密码错误' }, 401);
     }
 

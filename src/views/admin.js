@@ -9,8 +9,8 @@ export function getAdminHTML() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>博客管理后台</title>
-  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"><\/script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js" crossorigin="anonymous"><\/script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" crossorigin="anonymous"><\/script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
