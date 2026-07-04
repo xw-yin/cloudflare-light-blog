@@ -286,7 +286,7 @@ export function getAdminHTML() {
             <button class="btn btn-import" @click="showImportModal=true">导入文章</button>
             <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
               <input v-model="pinnedPostId" placeholder="输入文章ID" style="width:120px;padding:8px 12px;border:2px solid #c4b89e;border-radius:50px;font-size:14px;background:#f8f8f0;color:#725d42">
-              <button class="btn btn-pin" @click="setPinnedPost">{{pinnedPostId ? '取消置顶' : '置顶文章'}}</button>
+              <button class="btn btn-pin" @click="setPinnedPost">{{currentPinnedId ? '取消置顶' : '置顶文章'}}</button>
             </div>
           </div>
           <div v-if="currentPinnedId" style="margin-bottom:12px;padding:8px 16px;background:#fff3cd;border:2px solid #ffc107;border-radius:12px;color:#856404;font-size:14px;font-weight:600">
@@ -836,7 +836,10 @@ export function getAdminHTML() {
           
           // 如果当前有置顶文章，点击按钮为取消置顶
           if (currentPinnedId.value) {
-            const { confirmed } = await showConfirm('取消置顶', '确定取消置顶文章？');
+            // 找到当前置顶文章的标题
+            const pinnedPost = posts.value.find(p => p.id == currentPinnedId.value);
+            const pinnedTitle = pinnedPost ? pinnedPost.title : '未知文章';
+            const { confirmed } = await showConfirm('取消置顶', '确定取消置顶文章？\n\n文章编号：' + currentPinnedId.value + '\n文章标题：' + pinnedTitle);
             if (!confirmed) return;
             try {
               await api('/api/settings', { method: 'POST', data: { pinned_post_id: '' } });
@@ -863,7 +866,7 @@ export function getAdminHTML() {
               return;
             }
             
-            const { confirmed } = await showConfirm('置顶文章', '确定置顶文章：' + post.title + '？');
+            const { confirmed } = await showConfirm('置顶文章', '确定置顶文章？\n\n文章编号：' + id + '\n文章标题：' + post.title);
             if (!confirmed) return;
             
             await api('/api/settings', { method: 'POST', data: { pinned_post_id: id } });
