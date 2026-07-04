@@ -644,25 +644,6 @@ export function getAdminHTML() {
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>标签云图标</label>
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                    <span style="color:#9f927d;font-size:14px">预览：</span>
-                    <div style="width:36px;height:36px;border:2px solid #e8e0cc;border-radius:8px;background:#f0e8d8;display:flex;align-items:center;justify-content:center;overflow:hidden">
-                      <img v-if="settingsForm.tag_cloud_icon && (settingsForm.tag_cloud_icon.startsWith('http') || settingsForm.tag_cloud_icon.startsWith('/'))" :src="settingsForm.tag_cloud_icon" style="width:32px;height:32px;object-fit:cover">
-                      <span v-else-if="settingsForm.tag_cloud_icon" style="font-size:20px">{{settingsForm.tag_cloud_icon}}</span>
-                      <span v-else style="color:#9f927d;font-size:12px">无</span>
-                    </div>
-                  </div>
-                  <div style="display:flex;gap:8px;align-items:center">
-                    <input v-model="settingsForm.tag_cloud_icon" placeholder="输入emoji或图片地址" style="flex:1">
-                    <div @click="$refs.tagCloudIconInput.click()" style="padding:6px 12px;background:#19c8b9;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap">
-                      <input ref="tagCloudIconInput" type="file" @change="handleTagCloudIcon" accept="image/*" style="display:none">
-                      更换
-                    </div>
-                    <button v-if="settingsForm.tag_cloud_icon" @click="settingsForm.tag_cloud_icon=''" style="padding:6px 12px;background:#e05a5a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap">清除</button>
-                  </div>
-                </div>
-                <div class="form-group">
                   <label>标签云开关</label>
                   <div class="radio-group">
                     <label class="radio-item">

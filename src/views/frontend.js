@@ -100,6 +100,11 @@ export function getFrontendHTML(settings) {
       .post-card .meta { font-size: 0.75em; }
       footer { padding: 20px 16px; font-size: 0.8em; }
     }
+    .tag-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      filter: brightness(0.95);
+    }
   </style>
 </head>
 <body>
@@ -131,16 +136,14 @@ export function getFrontendHTML(settings) {
       </div>
       ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'left' ? `
       <div class="profile-card" style="margin-top:16px">
-        <h4>${settings.tag_cloud_icon ? (settings.tag_cloud_icon.startsWith('http') || settings.tag_cloud_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.tag_cloud_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.tag_cloud_icon + ' ') : '🏷️ '}标签云</h4>
-        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 0"></div>
+        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:8px;padding:8px 0"></div>
       </div>
       ` : ''}
     </aside>
     <div class="post-list" ${settings.profile_position === 'right' ? 'style="order:1"' : ''}>
       ${settings.enable_tag_cloud !== '0' && settings.tag_cloud_position === 'right' ? `
       <div style="margin-bottom:16px;padding:16px;background:#f7f3df;border-radius:20px;border:2px solid #e8e0cc">
-        <h4 style="margin-bottom:10px">${settings.tag_cloud_icon ? (settings.tag_cloud_icon.startsWith('http') || settings.tag_cloud_icon.startsWith('/images/') ? '<img src="' + escapeHtml(settings.tag_cloud_icon) + '" style="width:18px;height:18px;vertical-align:middle;margin-right:4px">' : settings.tag_cloud_icon + ' ') : '🏷️ '}标签云</h4>
-        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div id="tag-cloud" class="tag-cloud" style="display:flex;flex-wrap:wrap;gap:8px"></div>
       </div>
       ` : ''}
       <div style="margin-bottom:16px">
@@ -206,10 +209,17 @@ export function getFrontendHTML(settings) {
         });
         var tags = Object.keys(tagMap);
         if (tags.length > 0) {
-          var sizes = [0.75, 0.85, 1, 1.15, 1.3];
+          var colors = [
+            { bg: '#e6f9f6', color: '#11a89b', border: '#19c8b9' },
+            { bg: '#f0f7e6', color: '#5a8a2a', border: '#7cb342' },
+            { bg: '#fef3e2', color: '#c77c00', border: '#ffa726' },
+            { bg: '#fce4ec', color: '#c62828', border: '#ef5350' },
+            { bg: '#e8eaf6', color: '#283593', border: '#5c6bc0' },
+            { bg: '#f3e5f5', color: '#6a1b9a', border: '#ab47bc' }
+          ];
           tagCloudEl.innerHTML = tags.map(function(tag) {
-            var size = sizes[Math.floor(Math.random() * sizes.length)];
-            return '<a href="/?tag=' + encodeURIComponent(tag) + '" style="font-size:' + size + 'em;padding:3px 10px;background:#e6f5f0;color:#3a7a6a;border:1px solid #b8ddd0;border-radius:4px;text-decoration:none;white-space:nowrap">' + tag + '</a>';
+            var c = colors[Math.floor(Math.random() * colors.length)];
+            return '<a href="/?tag=' + encodeURIComponent(tag) + '" class="tag-item" style="display:inline-block;padding:5px 14px;background:' + c.bg + ';color:' + c.color + ';border:1.5px solid ' + c.border + ';border-radius:50px;text-decoration:none;white-space:nowrap;font-size:13px;font-weight:600;transition:all 0.25s ease;cursor:pointer">' + tag + '</a>';
           }).join('');
         } else {
           tagCloudEl.innerHTML = '<span style="color:#9f927d;font-size:0.85em">暂无标签</span>';
@@ -271,7 +281,7 @@ export function getFrontendHTML(settings) {
           var isPinned = String(post.id) === String(pinned_post_id);
           var cover = post.cover_image ? '<img src="' + post.cover_image + '" alt="' + post.title + '" loading="lazy">' : '<span style="color:#9f927d">封面</span>';
           var tags = post.tags ? post.tags.split(',').map(function(t) {
-            return '<span style="display:inline-block;padding:3px 10px;background:#e6f5f0;color:#3a7a6a;font-size:0.72em;font-weight:700;margin-right:8px;border:1px solid #b8ddd0;border-radius:4px;box-shadow:1px 2px 3px rgba(58,122,106,0.12)">' + t.trim() + '</span>';
+            return '<span style="display:inline-block;padding:3px 10px;background:#e6f9f6;color:#11a89b;font-size:0.72em;font-weight:700;margin-right:6px;border:1.5px solid #19c8b9;border-radius:50px">' + t.trim() + '</span>';
           }).join('') : '';
           function stripHtml(str) { return str ? str.split('<').join('').split('>').join('').split('&lt;').join('<').split('&gt;').join('>').split('&amp;').join('&').substring(0, 80) : ''; }
           var rawText = post.excerpt || post.content || '';

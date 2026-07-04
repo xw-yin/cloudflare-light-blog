@@ -162,7 +162,7 @@ export function getPostHTML(post, settings) {
         </div>
         <div id="post-content" style="line-height:1.8"></div>
         ${post.tags ? `<div style="margin-top:24px;padding-top:16px;border-top:2px solid #e8e0cc;display:flex;flex-wrap:wrap;gap:8px">${post.tags.split(',').map(t =>
-          `<span style="display:inline-block;padding:4px 12px;background:#e6f5f0;color:#3a7a6a;font-size:0.82em;font-weight:700;border:1px solid #b8ddd0;border-radius:4px;box-shadow:1px 2px 3px rgba(58,122,106,0.12)">${escapeHtml(t.trim())}</span>`
+          `<span style="display:inline-block;padding:5px 14px;background:#e6f9f6;color:#11a89b;font-size:0.85em;font-weight:700;border:1.5px solid #19c8b9;border-radius:50px">${escapeHtml(t.trim())}</span>`
         ).join('')}</div>` : ''}
       </article>
     </div>
