@@ -378,14 +378,6 @@ export function getPostHTML(post, settings) {
       if (typeof marked !== 'undefined' && marked.parse) {
         marked.setOptions({ breaks: true, gfm: true, headerIds: false, mangle: false });
         html = marked.parse(content);
-        // 净化 HTML：移除危险标签（script、iframe、object、embed、form）
-        html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-        html = html.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
-        html = html.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
-        html = html.replace(/<embed\b[^>]*>/gi, '');
-        html = html.replace(/<form\b[^<]*(?:(?!<\/form>)<[^<]*)*<\/form>/gi, '');
-        // 移除事件处理器（onclick、onerror等）
-        html = html.replace(/\s*on\w+\s*=\s*["'][^"']*["']/gi, '');
       } else {
         html = '<p>' + content.split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split(String.fromCharCode(10)).join('<br>') + '</p>';
       }
