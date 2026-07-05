@@ -8,7 +8,6 @@ export function getPostHTML(post, settings) {
   const siteDesc = settings.site_description || '';
   const siteAuthor = settings.site_author || siteName;
   const siteAvatar = settings.site_avatar || '';
-  const favicon = settings.site_favicon || '';
   const postExcerpt = post.excerpt || (post.content ? post.content.substring(0, 160).split('#').join('').split('*').join('').split('\n').join(' ').trim() : '');
 
   return `<!DOCTYPE html>
@@ -137,9 +136,8 @@ export function getPostHTML(post, settings) {
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
         </div>
-        <div style="font-size:0.78em;color:#9f927d;margin-bottom:14px;line-height:1.8">
-          <div>建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</div>
-          <div>最后更新：<span id="site-updated">-</span></div>
+        <div style="font-size:0.78em;color:#9f927d;text-align:center;margin-bottom:14px">
+          建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
         </div>
         <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>
