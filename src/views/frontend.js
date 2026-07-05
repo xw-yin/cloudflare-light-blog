@@ -44,7 +44,7 @@ export function getFrontendHTML(settings) {
     .sidebar { width: 280px; flex-shrink: 0; }
     .post-list { flex: 1; }
     #app { display: flex; flex-direction: column; gap: 28px; }
-    .post-card { background: #f7f3df; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); display: flex; flex-direction: row; transition: all 0.3s ease; border: 2px solid #e8e0cc; }
+    .post-card { background: #f7f3df; border-radius: 20px; overflow: visible; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); display: flex; flex-direction: row; transition: all 0.3s ease; border: 2px solid #e8e0cc; }
     .post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(114, 93, 66, 0.15); }
     .post-card .post-cover { width: 220px; flex-shrink: 0; background: #e8e0cc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .post-card .post-cover img { width: 100%; height: 100%; object-fit: cover; }

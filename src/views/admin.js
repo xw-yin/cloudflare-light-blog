@@ -396,8 +396,23 @@ export function getAdminHTML() {
                     </div>
                   </div>
                 </div>
-                <div class="form-group"><label>文章标签</label><input v-model="form.tags" placeholder="用英文逗号隔开"></div>
-                <div class="form-group"><label>文章密码</label><input v-model="form.password" type="password" placeholder="留空无需密码"></div>
+                <div class="form-group"><label>文章标签</label><input v-model="form.tags" placeholder="多个标签用英文逗号隔开，如：JavaScript,Vue,React"></div>
+                <div class="form-group">
+                  <label>文章密码</label>
+                  <div class="radio-group">
+                    <label class="radio-item">
+                      <input type="radio" value="" v-model="form.passwordType">
+                      <span class="radio-custom"></span>
+                      <span class="radio-label">无密码</span>
+                    </label>
+                    <label class="radio-item">
+                      <input type="radio" value="has" v-model="form.passwordType">
+                      <span class="radio-custom"></span>
+                      <span class="radio-label">有密码</span>
+                    </label>
+                  </div>
+                  <input v-if="form.passwordType === 'has'" v-model="form.password" type="password" placeholder="请输入文章密码" style="margin-top:8px">
+                </div>
                 <div class="form-group">
                   <label>封面图片</label>
                   <input v-model="form.cover_image" @input="coverPreview=form.cover_image" placeholder="输入外链地址" style="width:100%;margin-bottom:8px">
@@ -719,7 +734,7 @@ export function getAdminHTML() {
         const password = ref('');
         const posts = ref([]);
         const editingId = ref(null);
-        const form = ref({ title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', published_at: new Date().toISOString().split('T')[0] });
+        const form = ref({ title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', passwordType: '', published_at: new Date().toISOString().split('T')[0] });
         const coverPreview = ref('');
         const toast = ref('');
         const categories = ref([]);
@@ -770,10 +785,10 @@ export function getAdminHTML() {
         });
         const postPage = ref(1);
         const postPageSize = 10;
-        const openAdd = () => { editingId.value = 'new'; form.value = { title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', published_at: new Date().toISOString().split('T')[0] }; coverPreview.value = ''; };
+        const openAdd = () => { editingId.value = 'new'; form.value = { title: '', content: '', category: '', tags: '', status: 'draft', cover_image: '', password: '', passwordType: '', published_at: new Date().toISOString().split('T')[0] }; coverPreview.value = ''; };
         const cancelNewPost = async () => { const { confirmed } = await showConfirm('确认取消', '未保存的内容将丢失'); if (confirmed) { editingId.value = null; } };
-        const toggleEdit = (p) => { if (editingId.value === p.id) { editingId.value = null; } else { editingId.value = p.id; form.value = { title: p.title, content: p.content, category: p.category, tags: p.tags, status: p.status, cover_image: p.cover_image || '', password: p.password || '', published_at: p.published_at ? p.published_at.split('T')[0] : new Date().toISOString().split('T')[0] }; coverPreview.value = p.cover_image || ''; } };
-        const savePost = async () => { const { confirmed } = await showConfirm('确认保存', '确定保存？'); if (!confirmed) return; try { if (editingId.value === 'new') { await api('/api/admin/post', { method: 'POST', data: form.value }); } else { await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: form.value }); } editingId.value = null; loadPosts(); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
+        const toggleEdit = (p) => { if (editingId.value === p.id) { editingId.value = null; } else { editingId.value = p.id; form.value = { title: p.title, content: p.content, category: p.category, tags: p.tags, status: p.status, cover_image: p.cover_image || '', password: p.password || '', passwordType: p.password ? 'has' : '', published_at: p.published_at ? p.published_at.split('T')[0] : new Date().toISOString().split('T')[0] }; coverPreview.value = p.cover_image || ''; } };
+        const savePost = async () => { if (form.value.passwordType === 'has' && !form.value.password) { alert('请输入文章密码'); return; } const { confirmed } = await showConfirm('确认保存', '确定保存？'); if (!confirmed) return; try { const postData = { ...form.value }; if (postData.passwordType !== 'has') { postData.password = ''; } delete postData.passwordType; if (editingId.value === 'new') { await api('/api/admin/post', { method: 'POST', data: postData }); } else { await api('/api/admin/post?id=' + editingId.value, { method: 'PUT', data: postData }); } editingId.value = null; loadPosts(); showToast('保存成功'); } catch (e) { alert('保存失败'); } };
         const deletePost = async (id) => { const { confirmed } = await showConfirm('确认删除', '移到回收站？'); if (!confirmed) return; try { await api('/api/admin/post?id=' + id, { method: 'DELETE' }); loadPosts(); loadTrash(); showToast('已移到回收站'); } catch (e) { showToast('删除失败'); } };
         const editCategory = (c) => { editingCategory.value = c.id; categoryForm.value = { name: c.name, slug: c.slug, description: c.description || '' }; };
         const saveCategory = async () => { if (!categoryForm.value.name || !categoryForm.value.slug) { alert('请填写'); return; } const { confirmed } = await showConfirm('确认保存', '确定？'); if (!confirmed) return; try { const d = { ...categoryForm.value }; if (editingCategory.value && editingCategory.value !== 'new') d.id = editingCategory.value; await api('/api/category', { method: 'POST', data: d }); loadCategories(); editingCategory.value = null; categoryForm.value = { name: '', slug: '', description: '' }; showToast('保存成功'); } catch (e) { alert('保存失败'); } };
