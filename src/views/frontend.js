@@ -7,7 +7,6 @@ export function getFrontendHTML(settings) {
   const siteName = settings.site_name || '我的博客';
   const siteDesc = settings.site_description || '';
   const siteAuthor = settings.site_author || siteName;
-  const siteAvatar = settings.site_avatar || '';
   const siteBio = settings.site_bio || '';
 
   return `<!DOCTYPE html>
@@ -27,7 +26,6 @@ export function getFrontendHTML(settings) {
   <meta property="og:title" content="${escapeHtml(siteName)}">
   <meta property="og:description" content="${escapeHtml(siteDesc || siteName + ' - 基于 Cloudflare Workers 构建的轻量级博客')}">
   <meta property="og:site_name" content="${escapeHtml(siteName)}">
-  ${siteAvatar ? `<meta property="og:image" content="${escapeHtml(siteAvatar)}">` : ''}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -123,9 +121,9 @@ export function getFrontendHTML(settings) {
           <div class="stat-item"><div id="stat-posts" class="stat-num">-</div><div class="stat-label">文章</div></div>
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
-        </div>
-        <div style="font-size:0.78em;color:#9f927d;text-align:center;margin-bottom:14px">
-          建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
+          <div style="font-size:0.78em;color:#9f927d;text-align:center;width:100%;margin-top:8px">
+            建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
+          </div>
         </div>
         <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>

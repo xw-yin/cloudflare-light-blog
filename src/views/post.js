@@ -7,7 +7,6 @@ export function getPostHTML(post, settings) {
   const siteName = settings.site_name || '我的博客';
   const siteDesc = settings.site_description || '';
   const siteAuthor = settings.site_author || siteName;
-  const siteAvatar = settings.site_avatar || '';
   const postExcerpt = post.excerpt || (post.content ? post.content.substring(0, 160).split('#').join('').split('*').join('').split('\n').join(' ').trim() : '');
 
   return `<!DOCTYPE html>
@@ -128,16 +127,16 @@ export function getPostHTML(post, settings) {
   <main>
     <aside class="sidebar" ${settings.profile_position === 'right' ? 'style="order:2"' : ''}>
       <div class="profile-card">
-        ${siteAvatar ? `<img class="avatar" src="${escapeHtml(siteAvatar)}" alt="${escapeHtml(siteAuthor)}">` : `<img class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect fill='%23e8e0cc' width='80' height='80'/%3E%3Ctext x='40' y='45' text-anchor='middle' fill='%239f927d' font-size='32'%3E?%3C/text%3E%3C/svg%3E" alt="头像">`}
+        <img class="avatar" src="/icon/profile.png" alt="${escapeHtml(siteAuthor)}">
         <div class="name">${escapeHtml(siteAuthor)}</div>
         ${settings.site_bio ? `<div class="bio">${escapeHtml(settings.site_bio)}</div>` : ''}
         <div class="stats">
           <div class="stat-item"><div id="stat-posts" class="stat-num">-</div><div class="stat-label">文章</div></div>
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
-        </div>
-        <div style="font-size:0.78em;color:#9f927d;text-align:center;margin-bottom:14px">
-          建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
+          <div style="font-size:0.78em;color:#9f927d;text-align:center;width:100%;margin-top:8px">
+            建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
+          </div>
         </div>
         <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>

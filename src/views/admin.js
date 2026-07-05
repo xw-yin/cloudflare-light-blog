@@ -763,7 +763,7 @@ export function getAdminHTML() {
         const toast = ref('');
         const categories = ref([]);
         const currentPage = ref('posts');
-        const settingsForm = ref({ site_name: '', site_description: '', site_avatar: '', site_bio: '', site_links: '', site_author: '', site_footer: '', custom_js: '', site_theme: 'animal-forest', category_icon: '📂', links_icon: '🔗', tag_cloud_icon: '🏷️', enable_tag_cloud: '1', profile_position: 'left', tag_cloud_position: 'left', pinned_post_id: '', pinnedType: '' });
+        const settingsForm = ref({ site_name: '', site_description: '', site_bio: '', site_links: '', site_author: '', site_footer: '', custom_js: '', site_theme: 'animal-forest', enable_tag_cloud: '1', profile_position: 'left', tag_cloud_position: 'left', pinned_post_id: '', pinnedType: '' });
         const categoryForm = ref({ name: '', slug: '', description: '' });
         const editingCategory = ref(null);
         const trashPosts = ref([]);
@@ -792,7 +792,7 @@ export function getAdminHTML() {
         const logout = () => { localStorage.removeItem('token'); logged.value = false; };
         const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) { showToast('加载文章失败'); } };
         const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) { showToast('加载分类失败'); } };
-        const loadSettings = async () => { try { const r = await api('/api/settings'); const pinnedId = r.data.pinned_post_id || ''; settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', category_icon: r.data.category_icon || '📂', links_icon: r.data.links_icon || '🔗', tag_cloud_icon: r.data.tag_cloud_icon || '🏷️', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left', pinned_post_id: pinnedId, pinnedType: pinnedId ? 'has' : '' }; currentPinnedId.value = pinnedId; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
+        const loadSettings = async () => { try { const r = await api('/api/settings'); const pinnedId = r.data.pinned_post_id || ''; settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left', pinned_post_id: pinnedId, pinnedType: pinnedId ? 'has' : '' }; currentPinnedId.value = pinnedId; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
         const loadTrash = async () => { try { const r = await api('/api/admin/trash'); trashPosts.value = r.data; } catch (e) { showToast('加载回收站失败'); } };
         const showToast = (m) => { toast.value = m; setTimeout(() => toast.value = '', 2000); };
         const showConfirm = (t, m, options = {}) => new Promise(r => {
@@ -822,7 +822,6 @@ export function getAdminHTML() {
         const handleCoverDrop = async (e) => { const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const handleDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) await uploadFile(f); };
         const uploadFile = async (f) => { if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) { form.value.cover_image = d.url; coverPreview.value = d.url; } };
-        const handleAvatarDrop = async (e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) { const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; } };
         const deleteCover = async () => {
           const imageUrl = form.value.cover_image;
           if (!imageUrl) return;
@@ -847,10 +846,6 @@ export function getAdminHTML() {
           form.value.cover_image = '';
           coverPreview.value = '';
         };
-        const handleAvatar = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.site_avatar = d.url; };
-        const handleCategoryIcon = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.category_icon = d.url; };
-        const handleLinksIcon = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.links_icon = d.url; };
-        const handleTagCloudIcon = async (e) => { const f = e.target.files[0]; if (!f) return; if (f.size > 2097152) { alert('文件大小不能超过 2MB'); return; } const fd = new FormData(); fd.append('file', f); const r = await fetch('/api/upload', { method: 'POST', body: fd }); const d = await r.json(); if (d.url) settingsForm.value.tag_cloud_icon = d.url; };
         const restorePost = async (id) => { const { confirmed } = await showConfirm('确认恢复', '将文章恢复为草稿？'); if (!confirmed) return; try { await api('/api/admin/restore', { method: 'POST', data: { id } }); loadPosts(); loadTrash(); showToast('已恢复'); } catch (e) { showToast('恢复失败'); } };
         const permanentDelete = async (id) => { const { confirmed } = await showConfirm('确认删除', '彻底删除？不可恢复！'); if (!confirmed) return; try { await api('/api/admin/permanent-delete', { method: 'POST', data: { id } }); loadTrash(); showToast('已删除'); } catch (e) { showToast('删除失败'); } };
 
@@ -1046,7 +1041,7 @@ export function getAdminHTML() {
 
         watch(currentPage, (v) => { localStorage.setItem('adminPage', v); });
         onMounted(() => { check(); document.addEventListener('click', closeAllSelects); });
-        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, handleAvatar, handleAvatarDrop, handleCategoryIcon, handleLinksIcon, handleTagCloudIcon, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel, showImportModal, importFileName, importFileData, importing, importResult, handleImportFile, importPosts, currentPinnedId, setPinnedPost };
+        return { logged, username, password, login, logout, posts, editingId, form, coverPreview, toast, openAdd, cancelNewPost, toggleEdit, handleCoverChange, handleCoverDrop, handleDrop, deleteCover, savePost, deletePost, categories, currentPage, postPage, postPageSize, categoryForm, saveCategory, deleteCategory, editCategory, editingCategory, settingsForm, saveSettings, trashPosts, restorePost, permanentDelete, confirmModal, showConfirm, insertMd, applyTheme, customSelects, toggleSelect, selectOption, getSelectLabel, showImportModal, importFileName, importFileData, importing, importResult, handleImportFile, importPosts, currentPinnedId, setPinnedPost };
       }
     }).mount('#app');
   <\/script>
