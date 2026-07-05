@@ -28,8 +28,9 @@ export function getAdminHTML() {
     .sidebar-header { padding: 24px 20px; text-align: center; border-bottom: 2px solid rgba(255,255,255,0.2); }
     .sidebar-header h1 { font-size: 18px; }
     .sidebar-menu { padding: 16px 12px; }
-    .sidebar-menu a { display: block; padding: 12px 16px; color: rgba(255,255,255,0.8); text-decoration: none; border-radius: 12px; font-weight: 600; margin-bottom: 4px; }
-    .sidebar-menu a:hover, .sidebar-menu a.active { background: rgba(255,255,255,0.2); color: #fff; }
+    .sidebar-menu a { display: block; padding: 12px 16px; color: rgba(255,255,255,0.85); text-decoration: none; border-radius: 12px; font-weight: 600; margin-bottom: 4px; transition: all 0.25s ease; }
+    .sidebar-menu a:hover { background: #d6dff0; color: #fff; }
+    .sidebar-menu a.active { background: #B7C6E5; color: #fff; box-shadow: 0 3px 0 0 #9aaed4; }
     .sidebar-footer { padding: 16px 20px; border-top: 2px solid rgba(255,255,255,0.2); }
     .sidebar-footer button { width: 100%; padding: 10px; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
     .main-content { flex: 1; padding: 30px; }
@@ -42,10 +43,10 @@ export function getAdminHTML() {
     .btn-cancel:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #c4b89e; }
     .btn-back { background: linear-gradient(135deg, #7DC395, #5BAF7A); color: #fff; border: none; border-radius: 50px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 0 0 #4a9a68; padding: 8px 20px; font-size: 14px; }
     .btn-back:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #4a9a68; }
-    .btn-import { background: linear-gradient(135deg, #f0b27a, #e67e22); box-shadow: 0 4px 0 0 #d35400; }
-    .btn-import:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #d35400; }
-    .btn-pin { background: linear-gradient(135deg, #ffd700, #ffa500); box-shadow: 0 4px 0 0 #cc8400; color: #725d42; }
-    .btn-pin:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #cc8400; }
+    .btn-import { background: #19c8b9; box-shadow: 0 4px 0 0 #11a89b; }
+    .btn-import:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #11a89b; }
+    .btn-pin { background: #f7cd67; box-shadow: 0 4px 0 0 #d4a800; color: #725d42; }
+    .btn-pin:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #d4a800; }
     /* 美化单选按钮样式 */
     .radio-group { display: flex; gap: 12px; margin-top: 8px; }
     .radio-item { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }
@@ -727,7 +728,7 @@ export function getAdminHTML() {
             <label for="confirmCheckbox" style="cursor:pointer;color:#725d42;font-size:14px">{{confirmModal.checkboxLabel}}</label>
           </div>
           <div style="display:flex;gap:12px;justify-content:center">
-            <button class="btn btn-cancel" @click="confirmModal.show=false">取消</button>
+            <button class="btn btn-cancel" @click="confirmModal.onCancel()">取消</button>
             <button class="btn" @click="confirmModal.onConfirm(confirmModal.checkboxValue)">确认</button>
           </div>
         </div>
@@ -790,7 +791,8 @@ export function getAdminHTML() {
             checkbox: options.checkbox || false,
             checkboxLabel: options.checkboxLabel || '',
             checkboxValue: options.checkboxDefault !== undefined ? options.checkboxDefault : true,
-            onConfirm: (checkboxVal) => { confirmModal.value.show = false; r({ confirmed: true, checkboxValue: checkboxVal }); }
+            onConfirm: (checkboxVal) => { confirmModal.value.show = false; r({ confirmed: true, checkboxValue: checkboxVal }); },
+            onCancel: () => { confirmModal.value.show = false; r({ confirmed: false, checkboxValue: false }); }
           };
         });
         const postPage = ref(1);
