@@ -304,7 +304,7 @@ export function getFrontendHTML(settings) {
           function stripHtml(str) { return str ? str.split('<').join('').split('>').join('').split('&lt;').join('<').split('&gt;').join('>').split('&amp;').join('&').substring(0, 80) : ''; }
           var rawText = post.excerpt || post.content || '';
           var excerpt = post.password ? '🔒 该文章受到密码保护' : stripHtml(rawText) + (rawText.length > 80 ? '...' : '');
-          var pinBadge = isPinned ? '<span style="display:inline-flex;align-items:center;padding:2px 8px;background:linear-gradient(135deg,#ffd700,#ffa500);color:#725d42;font-size:0.7em;font-weight:700;border-radius:50px;margin-right:8px;box-shadow:0 2px 0 #cc8400"><img src="/icon/pin-post.png" style="width:14px;height:14px;margin-right:4px"> 置顶</span>' : '';
+          var pinBadge = isPinned ? '<img src="/icon/pin-post.png" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">' : '';
           return '<article class="post-card"' + (isPinned ? ' style="border:2px solid #ffd700;box-shadow:0 4px 16px rgba(255,215,0,0.3)"' : '') + '>' +
             '<div class="post-cover">' + cover + '</div>' +
             '<div class="post-content">' +

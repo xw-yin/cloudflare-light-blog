@@ -160,7 +160,7 @@ export function getPostHTML(post, settings) {
       ` : ''}
       <a class="back-link" href="/">← 返回首页</a>
       <article class="post-article">
-        <h1>${settings.pinned_post_id && String(post.id) === String(settings.pinned_post_id) ? '<img src="/icon/pin-post.png" class="icon-img" style="width:24px;height:24px;vertical-align:middle;margin-right:8px">' : ''}${escapeHtml(post.title)}</h1>
+        <h1 style="${settings.pinned_post_id && String(post.id) === String(settings.pinned_post_id) ? 'margin-bottom:8px' : ''}">${settings.pinned_post_id && String(post.id) === String(settings.pinned_post_id) ? '<img src="/icon/pin-post.png" class="icon-img" style="width:24px;height:24px;vertical-align:middle;margin-right:8px">' : ''}${escapeHtml(post.title)}</h1>
         <div class="post-meta">
           <span><img src="/icon/category.png" class="icon-img" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">${escapeHtml(post.category)}</span>
           <span>${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at))}</span>
