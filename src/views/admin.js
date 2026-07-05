@@ -31,6 +31,10 @@ export function getAdminHTML() {
     .sidebar-menu a { display: block; padding: 12px 16px; color: rgba(255,255,255,0.85); text-decoration: none; border-radius: 12px; font-weight: 600; margin-bottom: 4px; transition: all 0.25s ease; }
     .sidebar-menu a:hover { background: #d6dff0; color: #fff; }
     .sidebar-menu a.active { background: #B7C6E5; color: #fff; box-shadow: 0 3px 0 0 #9aaed4; }
+    .sidebar-menu a .nav-icon { display: inline-block; margin-right: 8px; width: 14px; height: 14px; vertical-align: middle; }
+    .sidebar-menu a .nav-icon img { width: 100%; height: 100%; vertical-align: middle; }
+    .sidebar-header-icon { width: 20px; height: 20px; vertical-align: middle; margin-right: 8px; }
+    .sidebar-footer-icon { width: 16px; height: 16px; vertical-align: middle; margin-right: 6px; }
     .sidebar-footer { padding: 16px 20px; border-top: 2px solid rgba(255,255,255,0.2); }
     .sidebar-footer button { width: 100%; padding: 10px; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 50px; cursor: pointer; }
     .main-content { flex: 1; padding: 30px; }
@@ -277,15 +281,15 @@ export function getAdminHTML() {
     </div>
     <div v-else class="admin-layout">
       <nav class="sidebar" role="navigation" aria-label="主导航">
-        <div class="sidebar-header"><h1>管理后台</h1></div>
+        <div class="sidebar-header"><h1><img src="/icon/home.png" alt="" class="sidebar-header-icon">管理后台</h1></div>
         <div class="sidebar-menu" role="menubar">
-          <a href="#" role="menuitem" :class="{active:currentPage==='posts'}" @click.prevent="currentPage='posts'" aria-label="文章管理">📝 文章管理</a>
-          <a href="#" role="menuitem" :class="{active:currentPage==='category'}" @click.prevent="currentPage='category'" aria-label="分类管理">📂 分类管理</a>
-          <a href="#" role="menuitem" :class="{active:currentPage==='profile'}" @click.prevent="currentPage='profile'" aria-label="个人设置">👤 个人设置</a>
-          <a href="#" role="menuitem" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'" aria-label="网站设置">⚙️ 网站设置</a>
-          <a href="#" role="menuitem" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'" aria-label="回收站">🗑️ 回收站</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='posts'}" @click.prevent="currentPage='posts'" aria-label="文章管理"><span v-if="currentPage==='posts'" class="nav-icon"><img src="/icon/navigate.png" alt=""></span>文章管理</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='category'}" @click.prevent="currentPage='category'" aria-label="分类管理"><span v-if="currentPage==='category'" class="nav-icon"><img src="/icon/navigate.png" alt=""></span>分类管理</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='profile'}" @click.prevent="currentPage='profile'" aria-label="个人设置"><span v-if="currentPage==='profile'" class="nav-icon"><img src="/icon/navigate.png" alt=""></span>个人设置</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='settings'}" @click.prevent="currentPage='settings'" aria-label="网站设置"><span v-if="currentPage==='settings'" class="nav-icon"><img src="/icon/navigate.png" alt=""></span>网站设置</a>
+          <a href="#" role="menuitem" :class="{active:currentPage==='trash'}" @click.prevent="currentPage='trash'" aria-label="回收站"><span v-if="currentPage==='trash'" class="nav-icon"><img src="/icon/navigate.png" alt=""></span>回收站</a>
         </div>
-        <div class="sidebar-footer"><button @click="logout">退出登录</button></div>
+        <div class="sidebar-footer"><button @click="logout"><img src="/icon/logout.png" alt="" class="sidebar-footer-icon">退出登录</button></div>
       </nav>
       <div class="main-content" role="main" aria-label="主要内容">
         <div v-if="currentPage==='posts'">

@@ -90,6 +90,11 @@ export default {
         return handleImage(request, env, path);
       }
 
+      // Icon 图标
+      if (path.startsWith('/icon/')) {
+        return handleIcon(env, path);
+      }
+
       // 文章详情页
       if (path.startsWith('/post/')) {
         return handlePostPage(request, env, path, ctx);
@@ -277,6 +282,26 @@ async function handleFavicon(env) {
   }
 
   return new Response(null, { status: 204 });
+}
+
+/**
+ * Icon 图标（从静态资源读取）
+ */
+async function handleIcon(env, path) {
+  const filename = path.replace('/icon/', '');
+  
+  if (!env.ASSETS) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  const assetPath = '/' + filename;
+  const response = await env.ASSETS.fetch(new Request(assetPath));
+  
+  if (!response || response.status === 404) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  return response;
 }
 
 /**
