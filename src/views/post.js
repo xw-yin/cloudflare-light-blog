@@ -217,15 +217,15 @@ export function getPostHTML(post, settings) {
         var tags = Object.keys(tagMap);
         if (tags.length > 0) {
           var colors = [
-            { bg: '#e6f9f6', color: '#11a89b', border: '#19c8b9' },
-            { bg: '#f0f7e6', color: '#5a8a2a', border: '#7cb342' },
-            { bg: '#fef3e2', color: '#c77c00', border: '#ffa726' },
-            { bg: '#fce4ec', color: '#c62828', border: '#ef5350' },
-            { bg: '#e8eaf6', color: '#283593', border: '#5c6bc0' },
-            { bg: '#f3e5f5', color: '#6a1b9a', border: '#ab47bc' },
-            { bg: '#e0f2f1', color: '#00695c', border: '#26a69a' },
-            { bg: '#fff8e1', color: '#f57f17', border: '#fbc02d' },
-            { bg: '#efebe9', color: '#4e342e', border: '#795548' }
+            { bg: '#f8a6b2', color: '#fff', border: '#f8a6b2' },  // app-pink
+            { bg: '#b77dee', color: '#fff', border: '#b77dee' },  // purple
+            { bg: '#889df0', color: '#fff', border: '#889df0' },  // app-blue
+            { bg: 'rgb(247,243,223)', color: '#725d42', border: '#e8dcc8' },  // default
+            { bg: '#e59266', color: '#fff', border: '#e59266' },  // app-orange
+            { bg: '#82d5bb', color: '#fff', border: '#82d5bb' },  // app-teal
+            { bg: '#8ac68a', color: '#fff', border: '#8ac68a' },  // app-green
+            { bg: '#fc736d', color: '#fff', border: '#fc736d' },  // app-red
+            { bg: '#e18c6f', color: '#fff', border: '#e18c6f' }   // warm-peach-pink
           ];
           tagCloudEl.innerHTML = tags.map(function(tag) {
             var c = colors[Math.floor(Math.random() * colors.length)];
