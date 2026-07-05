@@ -58,7 +58,7 @@ export function getPostHTML(post, settings) {
     .profile-card .avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; display: block; border: 3px solid #c4b89e; background: #e8e0cc; }
     .profile-card .name { font-size: 1.1em; font-weight: 700; text-align: center; margin-bottom: 4px; color: #794f27; }
     .profile-card .bio { color: #725d42; font-size: 0.85em; text-align: center; margin-bottom: 14px; }
-    .profile-card .stats { display: flex; justify-content: center; gap: 16px; padding-bottom: 14px; border-bottom: 2px solid #e8e0cc; margin-bottom: 14px; }
+    .profile-card .stats { display: flex; justify-content: center; gap: 16px; padding-bottom: 14px; }
     .profile-card .stat-item { text-align: center; }
     .profile-card .stat-num { font-size: 1.1em; font-weight: 800; color: #19c8b9; }
     .profile-card .stat-label { font-size: 0.75em; color: #9f927d; font-weight: 600; }
@@ -134,9 +134,9 @@ export function getPostHTML(post, settings) {
           <div class="stat-item"><div id="stat-posts" class="stat-num">-</div><div class="stat-label">文章</div></div>
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
-          <div style="font-size:0.78em;color:#9f927d;text-align:center;width:100%;margin-top:8px">
-            建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
-          </div>
+        </div>
+        <div style="font-size:0.78em;color:#9f927d;text-align:center;padding-bottom:14px;border-bottom:2px solid #e8e0cc;margin-bottom:14px">
+          建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
         </div>
         <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>

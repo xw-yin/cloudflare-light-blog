@@ -43,7 +43,7 @@ export function getFrontendHTML(settings) {
     #app { display: flex; flex-direction: column; gap: 28px; }
     .post-card { background: #f7f3df; border-radius: 20px; overflow: visible; box-shadow: 0 4px 10px rgba(107, 92, 67, 0.42); display: flex; flex-direction: row; transition: all 0.3s ease; border: 2px solid #e8e0cc; }
     .post-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(114, 93, 66, 0.15); }
-    .post-card .post-cover { width: 220px; flex-shrink: 0; background: #e8e0cc; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .post-card .post-cover { width: 220px; flex-shrink: 0; background: #e8e0cc; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 18px 0 0 18px; }
     .post-card .post-cover img { width: 100%; height: 100%; object-fit: cover; }
     .post-card .post-content { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; overflow: hidden; }
     .post-card h2 { font-size: 1.35em; margin-bottom: 8px; color: #794f27; font-weight: 700; }
@@ -56,7 +56,7 @@ export function getFrontendHTML(settings) {
     .profile-card .avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; margin: 0 auto 14px; display: block; border: 3px solid #c4b89e; background: #e8e0cc; }
     .profile-card .name { font-size: 1.1em; font-weight: 700; text-align: center; margin-bottom: 4px; color: #794f27; }
     .profile-card .bio { color: #725d42; font-size: 0.85em; text-align: center; margin-bottom: 14px; font-weight: 500; }
-    .profile-card .stats { display: flex; justify-content: center; gap: 16px; padding-bottom: 14px; border-bottom: 2px solid #e8e0cc; margin-bottom: 14px; }
+    .profile-card .stats { display: flex; justify-content: center; gap: 16px; padding-bottom: 14px; }
     .profile-card .stat-item { text-align: center; }
     .profile-card .stat-num { font-size: 1.1em; font-weight: 800; color: #19c8b9; }
     .profile-card .stat-label { font-size: 0.75em; color: #9f927d; font-weight: 600; }
@@ -121,9 +121,9 @@ export function getFrontendHTML(settings) {
           <div class="stat-item"><div id="stat-posts" class="stat-num">-</div><div class="stat-label">文章</div></div>
           <div class="stat-item"><div id="stat-cats" class="stat-num">-</div><div class="stat-label">分类</div></div>
           <div class="stat-item"><div id="stat-tags" class="stat-num">-</div><div class="stat-label">标签</div></div>
-          <div style="font-size:0.78em;color:#9f927d;text-align:center;width:100%;margin-top:8px">
-            建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
-          </div>
+        </div>
+        <div style="font-size:0.78em;color:#9f927d;text-align:center;padding-bottom:14px;border-bottom:2px solid #e8e0cc;margin-bottom:14px">
+          建站时间：${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}
         </div>
         <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>
