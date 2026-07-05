@@ -52,7 +52,7 @@ export function getAdminHTML() {
     .btn-pin { background: #FFB74D; box-shadow: 0 4px 0 0 #E8A33D; color: #fff; }
     .btn-pin:hover { transform: translateY(-1px); box-shadow: 0 5px 0 0 #E8A33D; }
     /* 美化单选按钮样式 */
-    .radio-group { display: flex; gap: 12px; margin-top: 8px; }
+    .radio-group { display: flex; gap: 12px; align-items: center; }
     .radio-item { position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .radio-item input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
     .radio-item .radio-custom { width: 20px; height: 20px; border: 2.5px solid #c4b89e; border-radius: 50%; background: #f8f8f0; transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 0 0 #d4c9b4; }
@@ -62,8 +62,8 @@ export function getAdminHTML() {
     .radio-item:hover .radio-custom { border-color: #19c8b9; }
     .radio-item .radio-label { font-size: 14px; color: #725d42; font-weight: 500; user-select: none; }
     .card { background: var(--card-bg, #f7f3df); border-radius: 20px; padding: 24px; box-shadow: 0 4px 10px rgba(107,92,67,0.42); border: 2px solid var(--card-border, #e8e0cc); margin-bottom: 16px; }
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #794f27; }
+    .form-group { margin-bottom: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .form-group label { min-width: 100px; font-weight: 600; color: #794f27; }
     .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 18px; border: 2.5px solid var(--input-border, #c4b89e); border-radius: 50px; font-size: 14px; background-color: #f8f8f0; color: var(--text-body, #725d42); box-shadow: 0 3px 0 0 var(--input-shadow, #d4c9b4); font-weight: 500; }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #ffcc00; box-shadow: 0 3px 0 0 #e0b800; outline: none; }
     .form-group textarea { border-radius: 18px; min-height: 80px; resize: vertical; }
@@ -399,19 +399,19 @@ export function getAdminHTML() {
                 <div class="form-group"><label>文章标签</label><input v-model="form.tags" placeholder="多个标签用英文逗号隔开，如：JavaScript,Vue,React"></div>
                 <div class="form-group">
                   <label>文章密码</label>
-                  <div class="radio-group">
-                    <label class="radio-item">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="" v-model="form.passwordType">
                       <span class="radio-custom"></span>
-                      <span class="radio-label">无密码</span>
+                      <span class="radio-label">无</span>
                     </label>
-                    <label class="radio-item">
+                    <label class="radio-item" style="margin:0">
                       <input type="radio" value="has" v-model="form.passwordType">
                       <span class="radio-custom"></span>
-                      <span class="radio-label">有密码</span>
+                      <span class="radio-label">有</span>
                     </label>
+                    <input v-if="form.passwordType === 'has'" v-model="form.password" type="password" placeholder="请输入密码" style="flex:1">
                   </div>
-                  <input v-if="form.passwordType === 'has'" v-model="form.password" type="password" placeholder="请输入文章密码" style="margin-top:8px">
                 </div>
                 <div class="form-group">
                   <label>封面图片</label>
