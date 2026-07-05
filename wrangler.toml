@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat"]
 # 静态资源配置
 # ============================================
 [assets]
-directory = "./icon"
+directory = "./public"
 binding = "ASSETS"
 serve_directly = false
 
