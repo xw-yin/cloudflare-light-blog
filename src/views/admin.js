@@ -306,10 +306,10 @@ export function getAdminHTML() {
                 <tr style="background:#f0e8d8">
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:70px;white-space:nowrap">删除</th>
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:70px;white-space:nowrap">编辑</th>
-                  <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:90px;white-space:nowrap">置顶</th>
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:60px">ID</th>
                   <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px">文章标题</th>
-                  <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px;width:150px;white-space:nowrap">分类</th>
+                  <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px;width:120px;white-space:nowrap">分类</th>
+                  <th style="padding:16px 16px;text-align:left;color:#794f27;font-weight:700;font-size:15px;width:200px">标签</th>
                   <th style="padding:16px 16px;text-align:center;color:#794f27;font-weight:700;font-size:15px;width:100px">状态</th>
                   <th style="padding:16px 16px;text-align:right;color:#794f27;font-weight:700;font-size:15px;width:120px">发布日期</th>
                   <th style="padding:16px 16px;text-align:right;color:#794f27;font-weight:700;font-size:15px;width:120px">最后更新</th>
@@ -320,15 +320,18 @@ export function getAdminHTML() {
                   <tr style="border-top:1px solid #e8e0cc">
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><button class="delete" @click="deletePost(post.id)" style="padding:5px 14px;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">删除</button></td>
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><button class="edit" @click="toggleEdit(post)" style="padding:5px 14px;border:none;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap">编辑</button></td>
-                    <td style="padding:14px 16px;text-align:center;white-space:nowrap">
-                      <button v-if="currentPinnedId == post.id" class="btn-pin" @click.stop="setPinnedPost(post.id)" style="padding:5px 12px;border:none;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">取消置顶</button>
-                      <button v-else class="btn-pin" @click.stop="setPinnedPost(post.id)" :disabled="currentPinnedId && currentPinnedId != post.id" :style="{opacity: currentPinnedId && currentPinnedId != post.id ? 0.4 : 1, cursor: currentPinnedId && currentPinnedId != post.id ? 'not-allowed' : 'pointer'}" style="padding:5px 12px;border:none;border-radius:50px;font-size:12px;font-weight:600;white-space:nowrap">置顶文章</button>
-                    </td>
                     <td style="padding:14px 16px;text-align:center;color:#9f927d;font-size:14px">#{{post.id}}</td>
                     <td style="padding:14px 16px;color:#794f27;font-weight:600;font-size:16px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
                       <span v-if="currentPinnedId == post.id" style="color:#ff6b00;margin-right:4px" title="已置顶">📌</span>{{post.title}}
                     </td>
                     <td style="padding:14px 16px;color:#9f927d;font-size:15px;white-space:nowrap">{{post.category}}</td>
+                    <td style="padding:14px 16px">
+                      <div style="display:flex;flex-wrap:wrap;gap:4px">
+                        <template v-for="(tag, i) in (post.tags || '').split(',').filter(t => t.trim())" :key="i">
+                          <span style="display:inline-block;padding:2px 8px;background:#e6f9f6;color:#11a89b;font-size:12px;font-weight:600;border-radius:12px;border:1px solid #19c8b9">{{tag.trim()}}</span>
+                        </template>
+                      </div>
+                    </td>
                     <td style="padding:14px 16px;text-align:center;white-space:nowrap"><span :style="{display:'inline-block',width:'8px',height:'8px',borderRadius:'50%',background:post.status==='published'?'#22c55e':'#9f927d',marginRight:'6px',verticalAlign:'middle'}"></span><span style="font-size:15px;color:#725d42;vertical-align:middle">{{post.status==='published'?'已发布':'草稿'}}</span></td>
                     <td style="padding:14px 16px;text-align:right;color:#9f927d;font-size:15px">{{new Date(post.published_at || post.created_at).toLocaleDateString('zh-CN')}}</td>
                     <td style="padding:14px 16px;text-align:right;color:#9f927d;font-size:15px">{{post.updated_at ? new Date(post.updated_at).toLocaleDateString('zh-CN') : '-'}}</td>
@@ -518,6 +521,7 @@ export function getAdminHTML() {
                     </div>
                   </div>
                 </div>
+                <div class="form-group"><label>置顶文章编号（留空则不置顶）</label><input v-model="settingsForm.pinned_post_id" type="number" min="0" step="1" placeholder="输入单个文章ID" @input="settingsForm.pinned_post_id = settingsForm.pinned_post_id.replace(/[^0-9]/g, '')"></div>
                 <div class="form-group"><label>网站页脚（HTML）</label><textarea v-model="settingsForm.site_footer" rows="3"></textarea></div>
                 <div class="form-group"><label>自定义JS</label><textarea v-model="settingsForm.custom_js" rows="4" placeholder="请输入完整的 <script>...</script> 标签，例如：&#10;<script src=&quot;https://cdn.jsdelivr.net/npm/xxx.js&quot;></script>"></textarea></div>
               </div>
@@ -744,7 +748,7 @@ export function getAdminHTML() {
         const logout = () => { localStorage.removeItem('token'); logged.value = false; };
         const loadPosts = async () => { try { const r = await api('/api/admin/posts'); posts.value = r.data; } catch (e) { showToast('加载文章失败'); } };
         const loadCategories = async () => { try { const r = await api('/api/categories'); categories.value = r.data; } catch (e) { showToast('加载分类失败'); } };
-        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', category_icon: r.data.category_icon || '📂', links_icon: r.data.links_icon || '🔗', tag_cloud_icon: r.data.tag_cloud_icon || '🏷️', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left' }; currentPinnedId.value = r.data.pinned_post_id || ''; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
+        const loadSettings = async () => { try { const r = await api('/api/settings'); settingsForm.value = { site_name: r.data.site_name || '', site_description: r.data.site_description || '', site_favicon: r.data.site_favicon || '', site_avatar: r.data.site_avatar || '', site_bio: r.data.site_bio || '', site_links: r.data.site_links || '', site_author: r.data.site_author || '', site_footer: r.data.site_footer || '', custom_js: r.data.custom_js || '', site_theme: r.data.site_theme || 'animal-forest', allow_robots: r.data.allow_robots || '1', enable_compression: r.data.enable_compression || '1', links_title: r.data.links_title || '友链', site_created_at: r.data.site_created_at || '2020-02-02', site_password: r.data.site_password || '', allowed_origins: r.data.allowed_origins || '*', category_icon: r.data.category_icon || '📂', links_icon: r.data.links_icon || '🔗', tag_cloud_icon: r.data.tag_cloud_icon || '🏷️', enable_tag_cloud: r.data.enable_tag_cloud || '1', profile_position: r.data.profile_position || 'left', tag_cloud_position: r.data.tag_cloud_position || 'left', pinned_post_id: r.data.pinned_post_id || '' }; currentPinnedId.value = r.data.pinned_post_id || ''; applyTheme(); } catch (e) { showToast('加载设置失败'); } };
         const loadTrash = async () => { try { const r = await api('/api/admin/trash'); trashPosts.value = r.data; } catch (e) { showToast('加载回收站失败'); } };
         const showToast = (m) => { toast.value = m; setTimeout(() => toast.value = '', 2000); };
         const showConfirm = (t, m, options = {}) => new Promise(r => {

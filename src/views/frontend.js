@@ -127,7 +127,6 @@ export function getFrontendHTML(settings) {
         </div>
         <div style="font-size:0.78em;color:#9f927d;margin-bottom:14px;line-height:1.8">
           <div>建站时间：<span id="site-created">${(function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(settings.site_created_at || '2020-02-02'))}</span></div>
-          <div>最后更新：<span id="site-updated">-</span></div>
         </div>
         <h4><img src="/icon/category.png" style="width:22px;height:22px;vertical-align:middle;margin-right:6px">分类</h4>
         <div id="category-list" class="category-list"></div>
@@ -175,7 +174,6 @@ export function getFrontendHTML(settings) {
       document.getElementById('stat-posts').textContent = s.postCount;
       document.getElementById('stat-cats').textContent = s.catCount;
       document.getElementById('stat-tags').textContent = s.tagCount || 0;
-      if (s.latestDate) { var d = new Date(s.latestDate); document.getElementById('site-updated').textContent = d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'; }
     });
     fetch('/api/categories').then(function(r){return r.json()}).then(function(cats){
       var list = document.getElementById('category-list');
@@ -314,7 +312,7 @@ export function getFrontendHTML(settings) {
               '<p style="color:#725d42;font-size:0.9em;line-height:1.7;margin:8px 0">' + excerpt + '</p>' +
               (tags ? '<div style="margin:8px 0 0">' + tags + '</div>' : '') +
               '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">' +
-                '<div class="meta"><span>📂 ' + post.category + '</span><span>' + (function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at)) + '</span></div>' +
+                '<div class="meta"><span><img src="/icon/category.png" style="width:16px;height:16px;vertical-align:middle;margin-right:4px">' + post.category + '</span><span>' + (function(d){return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'})(new Date(post.created_at)) + '</span></div>' +
                 '<a class="read-more" href="/post/' + formatDate(post.created_at) + '/' + post.id + '">阅读更多</a>' +
               '</div>' +
             '</div>' +
